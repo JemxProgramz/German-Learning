@@ -88,12 +88,21 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
   };
 
   const submitAnswer = () => {
-    if (!selectedAnswer) return;
-    
     const question = questions[currentIndex];
-    const isCorrect = Array.isArray(question.correctAnswer) 
-      ? question.correctAnswer.includes(selectedAnswer.trim()) 
-      : question.correctAnswer === selectedAnswer.trim();
+    const finalAnswer = question.questionType === 'sentence-building'
+      ? builtSentence.join(' ').trim()
+      : (selectedAnswer?.trim() || '');
+
+    if (!finalAnswer) return;
+    
+    const normalize = (s: string) => s.toLowerCase().replace(/[.,!?'" ]/g, '');
+    const isCorrect = question.questionType === 'sentence-building'
+      ? Array.isArray(question.correctAnswer)
+        ? question.correctAnswer.some(ans => normalize(ans) === normalize(finalAnswer))
+        : normalize(question.correctAnswer) === normalize(finalAnswer)
+      : Array.isArray(question.correctAnswer) 
+        ? question.correctAnswer.includes(finalAnswer) 
+        : question.correctAnswer === finalAnswer;
 
     setIsSubmitted(true);
     recordAnswer(topic, isCorrect);

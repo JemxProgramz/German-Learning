@@ -43,8 +43,9 @@ interface ProgressContextType {
   addMockTestResult: (result: Omit<MockTestResult, 'id' | 'date'>) => void;
   updateVocabularyStatus: (wordId: string, status: 'new' | 'learning' | 'review' | 'mastered') => void;
   resetProgress: () => void;
-  importProgress: (data: string) => void;
+  importProgress: (data: string) => boolean;
   loseHeart: () => void;
+  addHeart: () => void;
   addXP: (amount: number) => void;
   completeLesson: (lessonId: number) => void;
   refillHearts: () => void;
@@ -57,7 +58,24 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        return { ...defaultProgress, ...JSON.parse(stored) };
+        const parsed: UserProgress = { ...defaultProgress, ...JSON.parse(stored) };
+        // Offline heart regeneration calculation (1 heart per hour)
+        if (parsed.hearts < 5 && parsed.lastHeartRegenTime) {
+          const lastRegen = new Date(parsed.lastHeartRegenTime).getTime();
+          const now = Date.now();
+          const diffMs = Math.max(0, now - lastRegen);
+          const oneHourMs = 60 * 60 * 1000;
+          const heartsToAdd = Math.floor(diffMs / oneHourMs);
+          if (heartsToAdd > 0) {
+            parsed.hearts = Math.min(5, parsed.hearts + heartsToAdd);
+            if (parsed.hearts >= 5) {
+              parsed.lastHeartRegenTime = null;
+            } else {
+              parsed.lastHeartRegenTime = new Date(lastRegen + heartsToAdd * oneHourMs).toISOString();
+            }
+          }
+        }
+        return parsed;
       } catch (e) {
         console.error('Failed to parse stored progress', e);
         return defaultProgress;
@@ -69,6 +87,30 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   }, [progress]);
+
+  // Periodic check for heart regeneration every minute while app is open
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev.hearts >= 5 || !prev.lastHeartRegenTime) return prev;
+        const lastRegen = new Date(prev.lastHeartRegenTime).getTime();
+        const now = Date.now();
+        const diffMs = Math.max(0, now - lastRegen);
+        const oneHourMs = 60 * 60 * 1000;
+        const heartsToAdd = Math.floor(diffMs / oneHourMs);
+        if (heartsToAdd > 0) {
+          const newHearts = Math.min(5, prev.hearts + heartsToAdd);
+          return {
+            ...prev,
+            hearts: newHearts,
+            lastHeartRegenTime: newHearts >= 5 ? null : new Date(lastRegen + heartsToAdd * oneHourMs).toISOString()
+          };
+        }
+        return prev;
+      });
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const updateStreak = (currentProgress: UserProgress, todayStr: string): UserProgress => {
     const newProgress = { ...currentProgress };
@@ -229,6 +271,18 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const addHeart = () => {
+    setProgress(prev => {
+      if (prev.hearts >= 5) return prev;
+      const newHearts = Math.min(5, prev.hearts + 1);
+      return {
+        ...prev,
+        hearts: newHearts,
+        lastHeartRegenTime: newHearts >= 5 ? null : prev.lastHeartRegenTime
+      };
+    });
+  };
+
   const refillHearts = () => {
     setProgress(prev => ({
       ...prev,
@@ -237,12 +291,15 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
-  const importProgress = (data: string) => {
+  const importProgress = (data: string): boolean => {
     try {
       const parsed = JSON.parse(data);
+      if (!parsed || typeof parsed !== 'object') return false;
       setProgress({ ...defaultProgress, ...parsed });
+      return true;
     } catch (e) {
-      alert("Invalid backup file.");
+      console.error("Invalid backup file", e);
+      return false;
     }
   };
 
@@ -259,6 +316,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       resetProgress,
       importProgress,
       loseHeart,
+      addHeart,
       addXP,
       completeLesson,
       refillHearts

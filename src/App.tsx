@@ -33,7 +33,8 @@ function MainApp() {
       case 'artikel': return <ArtikelView />;
       case 'satzbildung': return <SatzbildungView />;
       case 'grammatik': return <GrammatikView />;
-      case 'hören': return <HorenView />;
+      case 'hören': 
+      case 'horen': return <HorenView />;
       case 'lesen': return <LesenView />;
       case 'schreiben': return <SchreibenView />;
       case 'sprechen': return <SprechenView />;

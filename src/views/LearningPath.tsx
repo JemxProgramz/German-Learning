@@ -108,7 +108,7 @@ export function LearningPathView({ onNavigate }: { onNavigate?: (view: string) =
                   onClick={() => {
                     if (!isLocked && onNavigate) {
                       // Logic to pick the right view based on the node's Icon or index
-                      const views = ['vocabulary', 'horen', 'schreiben', 'sprechen'];
+                      const views = ['vocabulary', 'artikel', 'grammatik', 'satzbildung', 'horen', 'lesen', 'schreiben', 'sprechen'];
                       const viewTarget = node.isCheckpoint ? 'mocktest' : views[index % views.length];
                       onNavigate(viewTarget);
                     }

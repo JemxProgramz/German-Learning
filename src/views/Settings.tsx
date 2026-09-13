@@ -1,37 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useProgress } from '../store/ProgressContext';
-import { Download, Upload, RefreshCw } from 'lucide-react';
+import { Download, Upload, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function SettingsView() {
-  const { progress, updateDailyGoal, resetProgress, importProgress } = useProgress();
+  const { progress, updateDailyGoal, resetProgress, importProgress, refillHearts } = useProgress();
   const [goal, setGoal] = useState(progress.dailyGoalMinutes);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => {
+      setNotification(null);
+    }, 4000);
+  };
 
   const handleSaveGoal = () => {
     updateDailyGoal(goal);
+    showToast('success', 'Daily study target updated successfully!');
   };
 
   const handleExport = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(progress));
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(progress, null, 2));
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "german_a1_backup.json");
+    dlAnchorElem.setAttribute("download", `german_a1_backup_${new Date().toISOString().split('T')[0]}.json`);
     dlAnchorElem.click();
+    showToast('success', 'Progress backup downloaded successfully.');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
+        const success = importProgress(content);
+        if (success) {
+          showToast('success', 'Progress restored successfully from backup!');
+        } else {
+          showToast('error', 'Failed to import backup. Please check that the file is valid JSON.');
+        }
+      }
+    };
+    reader.onerror = () => {
+      showToast('error', 'Error reading file.');
+    };
+    reader.readAsText(file);
+    // reset input value so re-importing same file triggers change
+    e.target.value = '';
   };
 
   const handleReset = () => {
-    if (window.confirm("Are you sure? This will delete your learning history entirely.")) {
-      resetProgress();
-    }
+    resetProgress();
+    setShowResetConfirm(false);
+    showToast('success', 'All learning progress has been reset.');
   };
 
   return (
     <div className="space-y-6 animate-in fade-in max-w-2xl mx-auto mt-4 md:mt-8">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-neutral-900 dark:text-neutral-100">Settings</h1>
-        <p className="text-neutral-500 dark:text-neutral-400 text-lg">Manage your learning preferences and local data.</p>
+        <p className="text-neutral-500 dark:text-neutral-400 text-lg">Manage your learning preferences, hearts, and local data.</p>
       </header>
+
+      {/* Notification Banner */}
+      {notification && (
+        <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in ${notification.type === 'success' ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800'}`}>
+          {notification.type === 'success' ? <CheckCircle2 size={20} className="shrink-0 text-green-600" /> : <AlertCircle size={20} className="shrink-0 text-red-600" />}
+          <div className="font-medium text-sm">{notification.message}</div>
+        </div>
+      )}
 
       <Card className="p-6 md:p-8 shadow-sm">
         <h2 className="text-xl font-bold mb-6 text-neutral-900 dark:text-neutral-100">Learning Goals</h2>
@@ -39,7 +83,7 @@ export function SettingsView() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <div className="font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Daily Study Target</div>
-              <div className="text-sm text-neutral-500 dark:text-neutral-400">Aim for consistency over intensity.</div>
+              <div className="text-sm text-neutral-500 dark:text-neutral-400">Consistency accelerates your exam readiness.</div>
             </div>
             <div className="flex items-center gap-3">
               <select 
@@ -56,17 +100,47 @@ export function SettingsView() {
             </div>
           </div>
         </div>
+
+        <div className="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-xl border border-neutral-100 dark:border-neutral-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Hearts System</div>
+            <div className="text-sm text-neutral-500 dark:text-neutral-400">Currently: {progress.hearts} / 5 hearts available.</div>
+          </div>
+          <Button 
+            onClick={() => {
+              refillHearts();
+              showToast('success', 'Hearts refilled to 5!');
+            }}
+            variant="outline"
+            size="sm"
+          >
+            Refill to 5 Hearts
+          </Button>
+        </div>
       </Card>
 
       <Card className="p-6 md:p-8 shadow-sm">
         <h2 className="text-xl font-bold mb-2 text-neutral-900 dark:text-neutral-100">Data Management</h2>
-        <p className="text-neutral-500 dark:text-neutral-400 mb-8">This app stores your progress locally in your browser. Export it to back it up.</p>
+        <p className="text-neutral-500 dark:text-neutral-400 mb-8">This app saves your progress locally in your browser. You can export a backup or restore from one anytime.</p>
         
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          accept=".json,application/json" 
+          className="hidden" 
+        />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Button onClick={handleExport} variant="outline" size="lg" className="justify-center gap-3 h-14">
-            <Download size={18} /> Backup Progress
+            <Download size={18} /> Backup Progress (JSON)
           </Button>
-          <Button variant="outline" size="lg" className="justify-center gap-3 h-14" onClick={() => alert('Import requires file selection in a full implementation.')}>
+          <Button 
+            onClick={() => fileInputRef.current?.click()} 
+            variant="outline" 
+            size="lg" 
+            className="justify-center gap-3 h-14"
+          >
             <Upload size={18} /> Import Backup
           </Button>
         </div>
@@ -75,11 +149,23 @@ export function SettingsView() {
           <div className="bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-red-700 dark:text-red-400 mb-1">Danger Zone</h3>
-              <p className="text-sm text-red-600/80 dark:text-red-300/80">This action will delete your learning history entirely and cannot be undone.</p>
+              <p className="text-sm text-red-600/80 dark:text-red-300/80">Reset all streaks, answers, mistake history, and lesson completion.</p>
             </div>
-            <Button onClick={handleReset} variant="danger" className="shrink-0">
-              <RefreshCw size={18} className="mr-2" /> Reset Progress
-            </Button>
+            
+            {!showResetConfirm ? (
+              <Button onClick={() => setShowResetConfirm(true)} variant="danger" className="shrink-0">
+                <RefreshCw size={18} className="mr-2" /> Reset Progress
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button onClick={handleReset} variant="danger" size="sm">
+                  Confirm Reset
+                </Button>
+                <Button onClick={() => setShowResetConfirm(false)} variant="outline" size="sm">
+                  Cancel
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </Card>

@@ -16,7 +16,9 @@ import {
   Eye,
   Sliders,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Grid3X3,
+  X
 } from 'lucide-react';
 import { MOCK_EXAM_QUESTIONS, MockQuestion } from '../data/mockTestData';
 import { speakGerman } from '../utils/speech';
@@ -37,6 +39,7 @@ export function MockTestView() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [markedForReview, setMarkedForReview] = useState<Record<string, boolean>>({});
+  const [mobileGridOpen, setMobileGridOpen] = useState(false);
 
   // Real-time tracking
   const [timeRemaining, setTimeRemaining] = useState(45 * 60);
@@ -462,29 +465,54 @@ export function MockTestView() {
     return (
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 animate-in fade-in">
         <div className="flex-1 space-y-6">
-          {/* Prominent Sticky Header with Timer & Controls */}
-          <div className="flex justify-between items-center bg-white dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200/60 dark:border-neutral-800/80 shadow-sm sticky top-4 z-20">
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-lg text-neutral-900 dark:text-neutral-100 tracking-tight">
-                A1 MOCK EXAM
-              </span>
-              <span className="hidden sm:inline-block text-xs font-semibold px-2.5 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                Teil {currentQuestion.section === 'Wortschatz' ? '1' : currentQuestion.section === 'Grammatik' ? '2' : currentQuestion.section === 'Lesen' ? '3' : '4'} – {currentQuestion.section}
-              </span>
+          {/* Prominent Sticky Header with Timer & Controls (Responsive Multi-Row on Mobile, Single-Row on Desktop) */}
+          <div className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-neutral-200/80 dark:border-neutral-800 shadow-sm sticky top-14 md:top-4 z-20 space-y-2 sm:space-y-0 sm:flex sm:justify-between sm:items-center">
+            {/* Top Row on Mobile: Exam Title & Quick Actions */}
+            <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base sm:text-lg text-neutral-900 dark:text-neutral-100 tracking-tight whitespace-nowrap">
+                  A1 MOCK EXAM
+                </span>
+                <span className="text-[11px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
+                  Teil {currentQuestion.section === 'Wortschatz' ? '1' : currentQuestion.section === 'Grammatik' ? '2' : currentQuestion.section === 'Lesen' ? '3' : '4'}
+                </span>
+              </div>
+
+              {/* Mobile-only Submit & Grid Trigger */}
+              <div className="flex items-center gap-1.5 sm:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMobileGridOpen(true)}
+                  className="text-xs h-8 px-2 gap-1 text-neutral-700 dark:text-neutral-300"
+                  title="Open question grid"
+                >
+                  <Grid3X3 size={13} />
+                  <span>{currentIdx + 1}/35</span>
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => triggerFinish(false)}
+                  className="text-xs h-8 px-2.5 whitespace-nowrap"
+                >
+                  Submit
+                </Button>
+              </div>
             </div>
 
-            {/* Countdown / Elapsed display */}
-            <div className="flex items-center gap-3">
+            {/* Timer & Controls Display */}
+            <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800">
               {timedMode ? (
                 <div className="flex items-center gap-2">
                   <div 
                     id="mock-exam-countdown"
-                    className={`flex items-center gap-2 font-mono font-bold px-3.5 py-1.5 rounded-lg border text-sm sm:text-base transition-colors duration-500 ease-in-out ${timerColorClass}`}
+                    className={`flex items-center gap-1.5 sm:gap-2 font-mono font-bold px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg border text-xs sm:text-sm md:text-base transition-colors duration-500 ease-in-out ${timerColorClass}`}
                   >
-                    <Clock size={16} className={`shrink-0 ${timerIconClass}`} />
+                    <Clock size={15} className={`shrink-0 ${timerIconClass}`} />
                     <span>{formatTime(timeRemaining)}</span>
                     {urgencyText && (
-                      <span className="hidden sm:inline-block text-[10px] font-sans font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/10 dark:bg-black/30">
+                      <span className="text-[9px] sm:text-[10px] font-sans font-extrabold uppercase tracking-wider px-1 py-0.5 rounded bg-black/10 dark:bg-black/30 whitespace-nowrap">
                         {urgencyText}
                       </span>
                     )}
@@ -494,26 +522,27 @@ export function MockTestView() {
                     variant="ghost"
                     size="sm"
                     onClick={togglePause}
-                    className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 h-9 px-2.5"
+                    className="text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 h-8 sm:h-9 px-2 sm:px-2.5"
                     title={isPaused ? 'Resume exam countdown' : 'Pause exam'}
                   >
-                    {isPaused ? <Play size={14} className="mr-1" /> : <Pause size={14} className="mr-1" />}
+                    {isPaused ? <Play size={13} className="sm:mr-1" /> : <Pause size={13} className="sm:mr-1" />}
                     <span className="hidden sm:inline">{isPaused ? 'Resume' : 'Pause'}</span>
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 font-mono font-medium bg-neutral-100 dark:bg-neutral-800/80 px-3.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-sm">
-                  <Clock size={15} className="text-neutral-500" />
+                <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 font-mono font-medium bg-neutral-100 dark:bg-neutral-800/80 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-xs sm:text-sm">
+                  <Clock size={14} className="text-neutral-500" />
                   <span>{formatTime(elapsedSeconds)}</span>
-                  <span className="text-[11px] font-sans text-neutral-400 dark:text-neutral-500">(Untimed)</span>
+                  <span className="hidden sm:inline text-[11px] font-sans text-neutral-400 dark:text-neutral-500">(Untimed)</span>
                 </div>
               )}
 
+              {/* Desktop Submit Button */}
               <Button
                 variant="danger"
                 size="sm"
                 onClick={() => triggerFinish(false)}
-                className="text-xs h-9 px-3"
+                className="hidden sm:inline-flex text-xs h-9 px-3 shrink-0"
               >
                 Submit Exam
               </Button>
@@ -523,14 +552,14 @@ export function MockTestView() {
           {/* Paused Overlay */}
           {isPaused && (
             <div className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <Card className="max-w-md w-full p-8 text-center space-y-5 shadow-2xl animate-in zoom-in-95">
+              <Card className="max-w-md w-full p-6 sm:p-8 text-center space-y-5 shadow-2xl animate-in zoom-in-95">
                 <div className="w-14 h-14 rounded-full bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 flex items-center justify-center mx-auto">
                   <Pause size={28} />
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-1">Exam Paused</h3>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    The timer is frozen and questions are blurred to maintain exam integrity. Ready to continue?
+                    The timer is frozen and questions are hidden to maintain exam integrity. Ready to continue?
                   </p>
                 </div>
                 <div className="bg-neutral-50 dark:bg-neutral-800/80 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs font-mono text-neutral-600 dark:text-neutral-400">
@@ -544,7 +573,7 @@ export function MockTestView() {
           )}
 
           {/* Active Question Card */}
-          <Card className="p-6 md:p-10">
+          <Card className="p-4 sm:p-6 md:p-10">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider px-2.5 py-1 rounded bg-primary-50 dark:bg-primary-950/40">
@@ -556,14 +585,14 @@ export function MockTestView() {
                   </span>
                 )}
               </div>
-              <div className="text-sm font-medium text-neutral-500 font-mono">
+              <div className="text-xs sm:text-sm font-medium text-neutral-500 font-mono">
                 Question {currentIdx + 1} / {MOCK_EXAM_QUESTIONS.length}
               </div>
             </div>
 
             {/* Reading passage context */}
             {currentQuestion.context && (
-              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 p-5 rounded-xl mb-6 text-sm md:text-base leading-relaxed text-neutral-800 dark:text-neutral-200">
+              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-700 p-4 sm:p-5 rounded-xl mb-6 text-sm md:text-base leading-relaxed text-neutral-800 dark:text-neutral-200 break-words">
                 <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Lesetext / Situation:</div>
                 <p className="italic">{currentQuestion.context}</p>
               </div>
@@ -571,7 +600,7 @@ export function MockTestView() {
 
             {/* Audio Script player for Listening Section */}
             {currentQuestion.audioScript && (
-              <div className="bg-primary-50/60 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800/60 p-5 rounded-xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-primary-50/60 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800/60 p-4 sm:p-5 rounded-xl mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <div className="text-xs font-semibold text-primary-700 dark:text-primary-400 uppercase tracking-wider mb-1">
                     Hörtext (Audio Announcement)
@@ -584,52 +613,52 @@ export function MockTestView() {
                   size="sm"
                   variant="outline"
                   onClick={() => speakGerman(currentQuestion.audioScript!)}
-                  className="gap-2 shrink-0 border-primary-300 text-primary-700 dark:text-primary-300"
+                  className="gap-2 shrink-0 border-primary-300 text-primary-700 dark:text-primary-300 w-full sm:w-auto"
                 >
                   <Volume2 size={16} /> Play Audio Track
                 </Button>
               </div>
             )}
             
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-neutral-900 dark:text-neutral-100 leading-snug">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 text-neutral-900 dark:text-neutral-100 leading-snug break-words">
               {currentQuestion.question}
             </h2>
             
             {/* Options */}
-            <div className="space-y-3 mb-8">
+            <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
               {currentQuestion.options.map((opt, i) => {
                 const isSelected = userAnswers[currentQuestion.id] === opt;
                 return (
                   <button 
                     key={opt} 
                     onClick={() => selectOption(opt)}
-                    className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-xl border-2 font-medium text-base md:text-lg transition-all ${
+                    className={`w-full flex items-center gap-3 sm:gap-4 text-left p-3.5 sm:px-5 sm:py-4 rounded-xl border-2 font-medium text-sm sm:text-base md:text-lg transition-all ${
                       isSelected 
-                        ? 'border-primary-600 bg-primary-50/80 dark:bg-primary-950/40 text-primary-900 dark:text-primary-100 shadow-sm'
+                        ? 'border-primary-600 bg-primary-50/80 dark:bg-primary-950/40 text-primary-900 dark:text-primary-100 shadow-sm' 
                         : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm shrink-0 transition-colors ${
+                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-sm shrink-0 transition-colors ${
                       isSelected 
                         ? 'border-primary-600 bg-primary-600 text-white font-bold' 
                         : 'border-neutral-300 dark:border-neutral-600 text-neutral-500'
                     }`}>
                       {['A','B','C','D'][i]}
                     </div>
-                    <span>{opt}</span>
+                    <span className="break-words flex-1">{opt}</span>
                   </button>
                 );
               })}
             </div>
 
             {/* Navigation Bottom Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-neutral-100 dark:border-neutral-800">
+            <div className="grid grid-cols-2 sm:flex sm:justify-between items-center gap-2.5 sm:gap-4 pt-6 border-t border-neutral-100 dark:border-neutral-800">
                <Button 
                  variant="outline" 
                  size="lg" 
                  disabled={currentIdx === 0}
                  onClick={() => setCurrentIdx(prev => Math.max(0, prev - 1))}
-                 className="w-full sm:w-auto px-6 gap-1"
+                 className="w-full sm:w-auto px-4 sm:px-6 gap-1"
                >
                  <ChevronLeft size={16} /> Previous
                </Button>
@@ -637,7 +666,7 @@ export function MockTestView() {
                <Button 
                  variant="ghost" 
                  onClick={toggleReviewFlag}
-                 className={`w-full sm:w-auto text-xs sm:text-sm gap-1 ${
+                 className={`col-span-2 sm:col-span-1 order-last sm:order-none w-full sm:w-auto text-xs sm:text-sm gap-1.5 ${
                    isFlagged(currentQuestion.id) ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-neutral-500'
                  }`}
                >
@@ -649,7 +678,7 @@ export function MockTestView() {
                  <Button 
                    onClick={() => setCurrentIdx(prev => prev + 1)} 
                    size="lg" 
-                   className="w-full sm:w-auto px-6 gap-1"
+                   className="w-full sm:w-auto px-4 sm:px-6 gap-1"
                  >
                    Next <ChevronRight size={16} />
                  </Button>
@@ -657,7 +686,7 @@ export function MockTestView() {
                  <Button 
                    onClick={() => triggerFinish(false)} 
                    size="lg" 
-                   className="w-full sm:w-auto px-6 bg-emerald-600 hover:bg-emerald-700 text-white"
+                   className="w-full sm:w-auto px-4 sm:px-6 bg-emerald-600 hover:bg-emerald-700 text-white"
                  >
                    Finish & Score Exam
                  </Button>
@@ -666,6 +695,106 @@ export function MockTestView() {
           </Card>
         </div>
         
+        {/* Mobile Question Navigator Modal / Drawer */}
+        {mobileGridOpen && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div className="bg-white dark:bg-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95">
+              <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between shrink-0">
+                <div>
+                  <h3 className="font-bold text-neutral-900 dark:text-neutral-100">Question Navigator</h3>
+                  <div className="text-xs text-neutral-500 font-mono">
+                    {Object.keys(userAnswers).length}/{MOCK_EXAM_QUESTIONS.length} Answered
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setMobileGridOpen(false)}
+                  className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  aria-label="Close question navigator"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Legend */}
+              <div className="flex items-center justify-around text-xs text-neutral-500 py-2.5 px-4 bg-neutral-50 dark:bg-neutral-800/50 border-b border-neutral-100 dark:border-neutral-800 shrink-0">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded bg-primary-600 inline-block"/> Current
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"/> Answered
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded bg-amber-400 inline-block"/> Flagged
+                </span>
+              </div>
+
+              <div className="p-4 space-y-4 overflow-y-auto flex-1">
+                {(['Wortschatz', 'Grammatik', 'Lesen', 'Hören'] as const).map(sectionName => {
+                  const sectionQuestions = MOCK_EXAM_QUESTIONS.filter(q => q.section === sectionName);
+                  return (
+                    <div key={sectionName}>
+                      <div className="flex justify-between text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                        <span>{sectionName}</span>
+                        <span className="font-mono text-[10px]">
+                          {sectionQuestions.filter(q => isAnswered(q.id)).length}/{sectionQuestions.length}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {sectionQuestions.map(q => {
+                          const qNum = q.questionNumber;
+                          const globalIdx = qNum - 1;
+                          const isCurrent = globalIdx === currentIdx;
+                          const answered = isAnswered(q.id);
+                          const flagged = isFlagged(q.id);
+
+                          let styleClass = 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300';
+                          if (isCurrent) {
+                            styleClass = 'bg-primary-600 text-white border-primary-600 font-bold shadow-sm';
+                          } else if (flagged) {
+                            styleClass = 'bg-amber-50 dark:bg-amber-950/40 border-amber-400 text-amber-800 dark:text-amber-200 font-semibold';
+                          } else if (answered) {
+                            styleClass = 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-medium';
+                          }
+
+                          return (
+                            <button 
+                              key={q.id} 
+                              onClick={() => {
+                                setCurrentIdx(globalIdx);
+                                setMobileGridOpen(false);
+                              }}
+                              className={`relative h-10 rounded-lg flex items-center justify-center text-xs font-mono border transition-all active:scale-95 ${styleClass}`}
+                            >
+                              {qNum}
+                              {flagged && (
+                                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-500" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
+                <Button 
+                  onClick={() => {
+                    setMobileGridOpen(false);
+                    triggerFinish(false);
+                  }}
+                  variant="danger" 
+                  fullWidth
+                  size="lg"
+                >
+                  Submit & Score Exam
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Desktop Navigator Sidebar */}
         <div className="hidden lg:block w-80 shrink-0">
           <Card className="sticky top-4 p-6 max-h-[calc(100vh-2rem)] overflow-y-auto scroll-smooth">
@@ -760,12 +889,12 @@ export function MockTestView() {
         <p className="text-neutral-500">Full Goethe-Zertifikat A1 exam simulation under authentic conditions.</p>
       </header>
 
-      <Card className="p-8">
+      <Card className="p-4 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
-          <FileText size={32} className="text-primary-600 dark:text-primary-400" />
+          <FileText size={32} className="text-primary-600 dark:text-primary-400 shrink-0" />
           <div>
-            <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">GOETHE-ZERTIFIKAT A1 MOCK EXAM</h2>
-            <p className="text-neutral-500 text-sm">Standard Structure: Wortschatz, Grammatik, Lesen & Hören</p>
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-neutral-100">GOETHE-ZERTIFIKAT A1 MOCK EXAM</h2>
+            <p className="text-neutral-500 text-xs sm:text-sm">Standard Structure: Wortschatz, Grammatik, Lesen & Hören</p>
           </div>
         </div>
 

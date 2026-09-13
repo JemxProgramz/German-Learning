@@ -231,7 +231,7 @@ export function HorenView() {
         </div>
 
         {/* Exercise Card */}
-        <Card className="p-6 md:p-8 border border-neutral-200 dark:border-neutral-800 space-y-6">
+        <Card className="p-4 sm:p-6 md:p-8 border border-neutral-200 dark:border-neutral-800 space-y-5 sm:space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-primary-50 dark:bg-primary-950/50 text-primary-700 dark:text-primary-300">
@@ -250,20 +250,20 @@ export function HorenView() {
           </div>
 
           {/* Large Audio Control Box */}
-          <div className="bg-neutral-50 dark:bg-neutral-800/60 p-6 rounded-2xl border border-neutral-200 dark:border-neutral-700 text-center space-y-4">
+          <div className="bg-neutral-50 dark:bg-neutral-800/60 p-4 sm:p-6 rounded-2xl border border-neutral-200 dark:border-neutral-700 text-center space-y-3 sm:space-y-4">
             <button
               onClick={() => handlePlayAudio()}
-              className="w-16 h-16 rounded-full bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center mx-auto shadow-md hover:scale-105 transition-transform"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center mx-auto shadow-md hover:scale-105 transition-transform"
               aria-label="Play German audio"
             >
-              <Volume2 className="w-8 h-8" />
+              <Volume2 className="w-7 h-7 sm:w-8 sm:h-8" />
             </button>
             <div className="text-xs text-neutral-500 font-medium">
               Click to listen to the German audio
             </div>
 
             {/* Playback speed selector */}
-            <div className="flex items-center justify-center gap-1.5 pt-1">
+            <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
               <span className="text-[11px] text-neutral-400 mr-1">Speed:</span>
               {[
                 { label: '0.6x Slow', val: 0.6 },
@@ -290,7 +290,7 @@ export function HorenView() {
 
           {/* Question / Prompt */}
           <div>
-            <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+            <h3 className="text-sm sm:text-base font-bold text-neutral-900 dark:text-neutral-100 break-words">
               {currentEx.type === 'transcription' 
                 ? 'Type what you hear in German (Achten Sie auf die Rechtschreibung):' 
                 : (currentEx.question || 'What is the message or situation?')}
@@ -385,14 +385,14 @@ export function HorenView() {
               <Button
                 onClick={handleSubmit}
                 disabled={currentEx.type === 'transcription' ? !userTranscription.trim() : !selectedOption}
-                className="px-6 py-2.5 justify-center"
+                className="w-full sm:w-auto px-6 py-2.5 justify-center"
               >
                 Check Answer
               </Button>
             ) : (
               <Button
                 onClick={handleNext}
-                className="px-6 py-2.5 justify-center flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-2.5 justify-center flex items-center gap-2"
               >
                 <span>Next Exercise</span>
                 <ArrowRight className="w-4 h-4" />
@@ -406,15 +406,15 @@ export function HorenView() {
 
   // Default Hub View
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in pb-12">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-            <Headphones className="w-6 h-6 text-primary-600" />
+          <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+            <Headphones className="w-6 h-6 text-primary-600 shrink-0" />
             Hörverstehen (Listening Comprehension)
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <p className="text-xs sm:text-sm text-neutral-500 mt-1">
             Dictation, situational announcements, and realistic German dialogues powered by Web Speech and generative AI.
           </p>
         </div>
@@ -422,7 +422,7 @@ export function HorenView() {
         <Button
           onClick={handleGenerateMore}
           disabled={isGenerating}
-          className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm"
+          className="w-full sm:w-auto justify-center flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm text-sm"
         >
           <Sparkles className="w-4 h-4" />
           <span>{isGenerating ? 'Generating Audio Tasks...' : 'Generate More Tasks'}</span>

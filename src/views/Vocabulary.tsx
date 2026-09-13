@@ -210,7 +210,7 @@ export function VocabularyView() {
           onClick={() => !isFlipped && setIsFlipped(true)}
         >
           {/* Card Front */}
-          <Card className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-8 transition-all duration-300 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-2xl ${isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 shadow-sm'}`}>
+          <Card className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 sm:p-8 transition-all duration-300 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-2xl ${isFlipped ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 shadow-sm'}`}>
             <div className="flex items-center gap-2 mb-4">
               {card.difficulty && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700">
@@ -222,13 +222,13 @@ export function VocabularyView() {
               )}
             </div>
 
-            <div className="text-4xl md:text-5xl font-bold text-center tracking-tight text-neutral-900 dark:text-neutral-100 flex items-center gap-3">
+            <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-center tracking-tight text-neutral-900 dark:text-neutral-100 flex flex-wrap justify-center items-center gap-2 sm:gap-3 px-2 break-words">
               {card.article && (
-                <span className={`text-2xl md:text-3xl px-2.5 py-1 rounded-lg border font-normal ${articleColors[card.article] || 'text-neutral-600'}`}>
+                <span className={`text-xl sm:text-2xl md:text-3xl px-2.5 py-1 rounded-lg border font-normal ${articleColors[card.article] || 'text-neutral-600'}`}>
                   {card.article}
                 </span>
               )}
-              <span>{card.german}</span>
+              <span className="break-words">{card.german}</span>
             </div>
 
             <button
@@ -239,47 +239,47 @@ export function VocabularyView() {
               <Volume2 className="w-5 h-5" />
             </button>
 
-            <div className="absolute bottom-6 text-neutral-400 text-xs font-medium tracking-wide">
+            <div className="absolute bottom-4 sm:bottom-6 text-neutral-400 text-xs font-medium tracking-wide">
               Click anywhere to flip
             </div>
           </Card>
 
           {/* Card Back */}
-          <Card className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-8 transition-all duration-300 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-2xl ${isFlipped ? 'opacity-100 shadow-sm' : 'opacity-0 pointer-events-none scale-95'}`}>
-            <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-1 flex items-center gap-2">
-              <span>{card.article ? `${card.article} ${card.german}` : card.german}</span>
+          <Card className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 sm:p-8 transition-all duration-300 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 rounded-2xl ${isFlipped ? 'opacity-100 shadow-sm' : 'opacity-0 pointer-events-none scale-95'}`}>
+            <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-1 flex items-center justify-center gap-2 px-2 max-w-full">
+              <span className="break-words text-center">{card.article ? `${card.article} ${card.german}` : card.german}</span>
               <button
                 onClick={(e) => handlePronounce(e, card.article ? `${card.article} ${card.german}` : card.german)}
                 aria-label="Pronounce word"
-                className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500"
+                className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 shrink-0"
               >
                 <Volume2 className="w-4 h-4" />
               </button>
             </div>
             
-            <div className="text-xl font-medium text-primary-600 dark:text-primary-400 mb-6">
+            <div className="text-lg sm:text-xl font-medium text-primary-600 dark:text-primary-400 mb-4 sm:mb-6 text-center break-words px-2">
               {card.english}
             </div>
 
-            <div className="w-full max-w-md space-y-3 text-left bg-neutral-50 dark:bg-neutral-800/50 p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
+            <div className="w-full max-w-md space-y-2.5 sm:space-y-3 text-left bg-neutral-50 dark:bg-neutral-800/50 p-3 sm:p-4 rounded-xl border border-neutral-100 dark:border-neutral-800">
               {card.plural && (
-                <div className="flex justify-between items-center text-sm pb-2 border-b border-neutral-200 dark:border-neutral-700">
+                <div className="flex justify-between items-center text-xs sm:text-sm pb-2 border-b border-neutral-200 dark:border-neutral-700">
                   <span className="text-neutral-500">Plural</span>
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">{card.plural}</span>
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100 break-words">{card.plural}</span>
                 </div>
               )}
               <div>
-                <div className="text-sm font-medium text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
-                  <span>{card.example}</span>
+                <div className="text-xs sm:text-sm font-medium text-neutral-900 dark:text-neutral-100 flex items-center justify-between gap-2">
+                  <span className="break-words flex-1">{card.example}</span>
                   <button
                     onClick={(e) => handlePronounce(e, card.example)}
                     aria-label="Pronounce example sentence"
-                    className="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-400 hover:text-neutral-700"
+                    className="p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-400 hover:text-neutral-700 shrink-0"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="text-xs text-neutral-500 mt-1">{card.exampleEnglish}</div>
+                <div className="text-[11px] sm:text-xs text-neutral-500 mt-1 break-words">{card.exampleEnglish}</div>
               </div>
             </div>
           </Card>
@@ -287,22 +287,22 @@ export function VocabularyView() {
 
         {/* Response grading buttons */}
         {isFlipped && (
-          <div className="grid grid-cols-4 gap-2 pt-2 animate-in fade-in">
-            <Button onClick={() => handleResponse('again')} variant="danger" className="flex-col h-14 py-1.5">
-              <span className="text-xs font-semibold">Again</span>
-              <span className="text-[10px] opacity-75">1 day</span>
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-2 animate-in fade-in">
+            <Button onClick={() => handleResponse('again')} variant="danger" className="flex-col h-14 py-1 sm:py-1.5 px-1">
+              <span className="text-[11px] sm:text-xs font-semibold">Again</span>
+              <span className="text-[9px] sm:text-[10px] opacity-75">1 day</span>
             </Button>
-            <Button onClick={() => handleResponse('hard')} variant="outline" className="flex-col h-14 py-1.5 border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400">
-              <span className="text-xs font-semibold">Hard</span>
-              <span className="text-[10px] opacity-75">2 days</span>
+            <Button onClick={() => handleResponse('hard')} variant="outline" className="flex-col h-14 py-1 sm:py-1.5 px-1 border-orange-200 dark:border-orange-900/50 text-orange-600 dark:text-orange-400">
+              <span className="text-[11px] sm:text-xs font-semibold">Hard</span>
+              <span className="text-[9px] sm:text-[10px] opacity-75">2 days</span>
             </Button>
-            <Button onClick={() => handleResponse('good')} variant="outline" className="flex-col h-14 py-1.5 border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400">
-              <span className="text-xs font-semibold">Good</span>
-              <span className="text-[10px] opacity-75">4 days</span>
+            <Button onClick={() => handleResponse('good')} variant="outline" className="flex-col h-14 py-1 sm:py-1.5 px-1 border-blue-200 dark:border-blue-900/50 text-blue-600 dark:text-blue-400">
+              <span className="text-[11px] sm:text-xs font-semibold">Good</span>
+              <span className="text-[9px] sm:text-[10px] opacity-75">4 days</span>
             </Button>
-            <Button onClick={() => handleResponse('easy')} variant="secondary" className="flex-col h-14 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-              <span className="text-xs font-semibold">Easy</span>
-              <span className="text-[10px] opacity-75">7 days</span>
+            <Button onClick={() => handleResponse('easy')} variant="secondary" className="flex-col h-14 py-1 sm:py-1.5 px-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              <span className="text-[11px] sm:text-xs font-semibold">Easy</span>
+              <span className="text-[9px] sm:text-[10px] opacity-75">7 days</span>
             </Button>
           </div>
         )}
@@ -314,23 +314,23 @@ export function VocabularyView() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-primary-600" />
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-primary-600 shrink-0" />
             Wortschatz (Vocabulary)
           </h1>
-          <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-0.5">
+          <p className="text-neutral-500 dark:text-neutral-400 text-xs sm:text-sm mt-0.5">
             Structured vocabulary across CEFR levels with spaced repetition and AI generation.
           </p>
         </div>
 
         {/* Generate More Button */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={handleGenerateMore}
             disabled={isGenerating}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm"
+            className="w-full sm:w-auto justify-center flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm text-sm"
           >
             {isGenerating ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
@@ -350,10 +350,10 @@ export function VocabularyView() {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('study')}
-          className={`pb-3 px-4 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'study'
               ? 'border-primary-600 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
@@ -365,7 +365,7 @@ export function VocabularyView() {
 
         <button
           onClick={() => setActiveTab('srs')}
-          className={`pb-3 px-4 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors relative ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 relative ${
             activeTab === 'srs'
               ? 'border-primary-600 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
@@ -382,7 +382,7 @@ export function VocabularyView() {
 
         <button
           onClick={() => setActiveTab('browse')}
-          className={`pb-3 px-4 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'browse'
               ? 'border-primary-600 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'

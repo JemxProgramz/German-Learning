@@ -105,19 +105,24 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
     <div className="flex h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans overflow-hidden">
       
       {/* Mobile Top Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-4 z-20">
-        <div className="font-semibold text-lg flex items-center gap-2">
-          A1 Trainer
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between px-3 sm:px-4 z-30">
+        <div className="font-semibold text-base sm:text-lg flex items-center gap-2 truncate">
+          <span className="w-5 h-5 rounded bg-primary-600 flex items-center justify-center text-white text-xs shrink-0">🇩🇪</span>
+          <span className="truncate font-bold">A1 Trainer</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-red-500 font-bold">
-            <Heart size={18} className="fill-current" /> {progress?.hearts || 0}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1 text-red-500 font-bold text-xs sm:text-sm px-2 py-1 bg-red-50/50 dark:bg-red-950/30 rounded-full border border-red-100 dark:border-red-900/30">
+            <Heart size={15} className="fill-current" /> {progress?.hearts || 0}
           </div>
-          <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-bold">
-            <Flame size={18} className="fill-current" /> {progress?.currentStreak || 0}
+          <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-bold text-xs sm:text-sm px-2 py-1 bg-primary-50/50 dark:bg-primary-950/30 rounded-full border border-primary-100 dark:border-primary-900/30">
+            <Flame size={15} className="fill-current" /> {progress?.currentStreak || 0}
           </div>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -mr-2 text-neutral-600 dark:text-neutral-400">
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -197,50 +202,61 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
 
       {/* Mobile More Menu Overlay */}
       <div className={`
-        md:hidden fixed inset-0 z-30 bg-black/50 transition-opacity duration-300
+        md:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs transition-opacity duration-300
         ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
       `} onClick={() => setMobileMenuOpen(false)}>
         <div 
-          className={`absolute right-0 top-0 bottom-0 w-64 bg-white dark:bg-neutral-900 shadow-xl transition-transform duration-300 transform ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute right-0 top-0 bottom-0 w-[80vw] max-w-xs sm:w-72 bg-white dark:bg-neutral-900 shadow-2xl transition-transform duration-300 ease-out transform flex flex-col ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           onClick={e => e.stopPropagation()}
         >
-          <div className="h-14 flex items-center justify-between px-4 border-b border-neutral-200 dark:border-neutral-800">
-            <span className="font-bold">More Options</span>
-            <button onClick={() => setMobileMenuOpen(false)} className="p-2"><X size={20} /></button>
+          <div className="h-14 flex items-center justify-between px-4 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+            <span className="font-bold text-base">Navigation</span>
+            <button 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              aria-label="Close navigation menu"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <div className="p-4 space-y-6 overflow-y-auto h-[calc(100vh-3.5rem)] scroll-smooth">
+          <div className="p-4 space-y-6 overflow-y-auto flex-1 scroll-smooth">
              {navGroups.map((group, idx) => (
               <div key={idx} className="space-y-1">
-                <div className="text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-2 px-3">
+                <div className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-2 px-3">
                   {group.title}
                 </div>
                 {group.items.map((item) => {
                   const Icon = item.icon;
+                  const isCurrent = currentView === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => handleNav(item.id)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 min-h-[44px] rounded-lg text-left text-sm font-medium transition-colors ${
+                        isCurrent 
+                          ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 font-semibold' 
+                          : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                      }`}
                     >
-                      <Icon size={18} />
+                      <Icon size={18} className={isCurrent ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-500 dark:text-neutral-400'} />
                       {item.label}
                     </button>
                   );
                 })}
               </div>
             ))}
-            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-1">
                <button
                 onClick={() => handleNav('settings')}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 min-h-[44px] rounded-lg text-left text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               >
-                <Settings size={18} /> Settings
+                <Settings size={18} className="text-neutral-500 dark:text-neutral-400" /> Settings
               </button>
               <button
                 onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 min-h-[44px] rounded-lg text-left text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />} Toggle Theme
+                {theme === 'dark' ? <Sun size={18} className="text-neutral-500 dark:text-neutral-400" /> : <Moon size={18} className="text-neutral-500 dark:text-neutral-400" />} Toggle Theme
               </button>
             </div>
           </div>
@@ -248,9 +264,9 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main ref={mainRef} onScroll={handleScroll} className="flex-1 overflow-y-auto w-full pt-14 md:pt-0 pb-16 md:pb-0 relative scroll-smooth">
+      <main ref={mainRef} onScroll={handleScroll} className="flex-1 overflow-y-auto w-full pt-14 md:pt-0 pb-20 md:pb-6 relative scroll-smooth">
         
-        {/* Desktop Header area if needed, or just let content handle it */}
+        {/* Desktop Header area */}
         <div className="hidden md:flex items-center justify-between px-8 py-4 sticky top-0 bg-neutral-50/80 dark:bg-neutral-950/80 backdrop-blur-md z-10 border-b border-transparent">
           <div className="font-semibold text-neutral-900 dark:text-neutral-100 capitalize">
             {currentView.replace('-', ' ')}
@@ -268,19 +284,23 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
               <Flame size={16} className="text-orange-500 fill-orange-500" />
               {progress?.currentStreak || 0}
             </div>
-            <button onClick={() => handleNav('settings')} className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors">
-              <Settings size={16} />
+            <button 
+              onClick={() => handleNav('settings')} 
+              className="w-9 h-9 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors"
+              aria-label="Settings"
+            >
+              <Settings size={17} />
             </button>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto p-4 md:p-8 animate-in fade-in duration-300">
+        <div className="max-w-5xl mx-auto p-3.5 sm:p-6 md:p-8 animate-in fade-in duration-300">
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-around px-2 z-20 pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-around px-1 z-20 pb-safe">
         {bottomNavItems.map(item => {
           const Icon = item.icon;
           const isActive = currentView === item.id || (item.id === 'lesen' && ['schreiben', 'sprechen', 'horen', 'grammatik'].includes(currentView));
@@ -288,10 +308,10 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
             <button
               key={item.id}
               onClick={() => handleNav(item.id)}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-500 dark:text-neutral-400'}`}
+              className={`flex flex-col items-center justify-center flex-1 h-full min-h-[48px] py-1 transition-colors touch-manipulation active:scale-95 ${isActive ? 'text-primary-600 dark:text-primary-400 font-semibold' : 'text-neutral-500 dark:text-neutral-400'}`}
             >
               <Icon size={20} className={isActive ? 'fill-current opacity-20' : ''} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className="text-[11px] leading-tight mt-0.5">{item.label}</span>
             </button>
           )
         })}

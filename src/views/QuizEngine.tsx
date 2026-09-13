@@ -340,22 +340,22 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in mt-4 md:mt-8">
       {/* Top Status Bar */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4 flex-1">
-          <span className="text-sm font-semibold text-neutral-400 uppercase tracking-wider whitespace-nowrap">
-            Question {currentIndex + 1} of {questions.length}
+      <div className="flex justify-between items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+          <span className="text-xs sm:text-sm font-semibold text-neutral-400 uppercase tracking-wider whitespace-nowrap">
+            Q {currentIndex + 1}/{questions.length}
           </span>
-          <div className="w-full max-w-[200px] bg-neutral-100 dark:bg-neutral-800 rounded-full h-2 overflow-hidden">
+          <div className="flex-1 max-w-[140px] sm:max-w-[200px] bg-neutral-100 dark:bg-neutral-800 rounded-full h-2 overflow-hidden">
             <div className="bg-primary-500 h-full transition-all duration-300" style={{ width: `${currentProgress}%` }} />
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 text-red-500 font-bold text-sm">
-            <Heart size={18} className="fill-current" /> {progress.hearts}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1 text-red-500 font-bold text-xs sm:text-sm">
+            <Heart size={16} className="fill-current sm:w-[18px] sm:h-[18px]" /> {progress.hearts}
           </div>
           <button 
             onClick={() => setActive(false)} 
-            className="text-sm font-medium text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors ml-3 cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors ml-1 sm:ml-3 cursor-pointer py-1 px-1.5"
           >
             Quit ✕
           </button>
@@ -363,7 +363,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
       </div>
 
       <Card 
-        className={`p-6 md:p-10 shadow-sm border-neutral-200/60 dark:border-neutral-800/80 transition-transform ${shake ? 'shadow-red-500/20 shadow-xl' : ''}`} 
+        className={`p-4 sm:p-6 md:p-10 shadow-sm border-neutral-200/60 dark:border-neutral-800/80 transition-transform ${shake ? 'shadow-red-500/20 shadow-xl' : ''}`} 
         style={{ animation: shake ? 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both' : 'none' }}
       >
         {/* Audio / Listen Bar */}
@@ -386,8 +386,8 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
           </div>
         )}
 
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-tight">
+        <div className="flex items-start justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-900 dark:text-neutral-100 leading-snug break-words flex-1">
             {currentQuestion.question}
           </h2>
           <button 
@@ -400,7 +400,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
         </div>
 
         {/* Question Input / Choices */}
-        <div className="space-y-3 mb-8">
+        <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
           {currentQuestion.questionType === 'multiple-choice' || currentQuestion.questionType === 'true-false' ? (
             currentQuestion.options?.map((option, idx) => {
               const isSelected = selectedAnswer === option;
@@ -426,7 +426,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                   key={idx}
                   disabled={isSubmitted}
                   onClick={() => setSelectedAnswer(option)}
-                  className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-xl border-2 transition-all font-medium text-lg cursor-pointer ${btnClass}`}
+                  className={`w-full flex items-center gap-3 sm:gap-4 text-left p-3.5 sm:px-5 sm:py-4 rounded-xl border-2 transition-all font-medium text-base sm:text-lg cursor-pointer ${btnClass}`}
                 >
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                     isSelected && !isSubmitted 
@@ -443,7 +443,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                     {isSubmitted && (Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer.includes(option) : currentQuestion.correctAnswer === option) && <div className="w-2 h-2 rounded-full bg-white"/>}
                     {isSubmitted && isSelected && !(Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer.includes(option) : currentQuestion.correctAnswer === option) && <div className="w-2 h-0.5 rounded-full bg-white"/>}
                   </div>
-                  <span>{option}</span>
+                  <span className="break-words flex-1">{option}</span>
                 </button>
               );
             })
@@ -451,9 +451,9 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
           ) : currentQuestion.questionType === 'sentence-building' ? (
             <div className="space-y-6">
               {/* Build Sentence Drop / Tap Zone */}
-              <div className="min-h-[70px] p-4 flex flex-wrap gap-2 border-2 border-neutral-200 dark:border-neutral-700 items-center bg-neutral-50/70 dark:bg-neutral-900/50 rounded-xl">
+              <div className="min-h-[70px] p-3 sm:p-4 flex flex-wrap gap-2 border-2 border-neutral-200 dark:border-neutral-700 items-center bg-neutral-50/70 dark:bg-neutral-900/50 rounded-xl">
                 {selectedTokens.length === 0 && (
-                  <span className="text-neutral-400 dark:text-neutral-500 font-medium select-none">
+                  <span className="text-neutral-400 dark:text-neutral-500 font-medium select-none text-xs sm:text-sm">
                     Tap the words below to build the German sentence...
                   </span>
                 )}
@@ -464,7 +464,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                     onClick={() => {
                       setSelectedTokens(prev => prev.filter((_, i) => i !== idx));
                     }}
-                    className="px-4 py-2.5 bg-white dark:bg-neutral-800 border-2 border-primary-400 dark:border-primary-600 rounded-xl font-semibold shadow-sm hover:bg-neutral-50 active:scale-95 transition-all text-neutral-900 dark:text-neutral-100 cursor-pointer"
+                    className="px-3 sm:px-4 py-2 sm:py-2.5 bg-white dark:bg-neutral-800 border-2 border-primary-400 dark:border-primary-600 rounded-xl font-semibold text-sm sm:text-base shadow-sm hover:bg-neutral-50 active:scale-95 transition-all text-neutral-900 dark:text-neutral-100 cursor-pointer"
                   >
                     {token.text}
                   </button>
@@ -473,10 +473,10 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
               
               {/* Word Bank */}
               <div>
-                <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 px-1">
+                <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2.5 px-1">
                   Word Bank
                 </div>
-                <div className="flex flex-wrap gap-2.5 p-2 bg-neutral-100/60 dark:bg-neutral-800/40 rounded-xl">
+                <div className="flex flex-wrap gap-2 p-2 bg-neutral-100/60 dark:bg-neutral-800/40 rounded-xl">
                   {unselectedTokens.map((token) => (
                     <button
                       key={token.id}
@@ -484,7 +484,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                       onClick={() => {
                         setSelectedTokens(prev => [...prev, token]);
                       }}
-                      className="px-4 py-2.5 bg-white dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-600 rounded-xl font-semibold shadow-sm hover:border-primary-400 hover:text-primary-600 active:scale-95 transition-all text-neutral-800 dark:text-neutral-200 cursor-pointer"
+                      className="px-3 sm:px-4 py-2 sm:py-2.5 bg-white dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-600 rounded-xl font-semibold text-sm sm:text-base shadow-sm hover:border-primary-400 hover:text-primary-600 active:scale-95 transition-all text-neutral-800 dark:text-neutral-200 cursor-pointer"
                     >
                       {token.text}
                     </button>
@@ -508,7 +508,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                   })()
                 }`}>
                   <div className="text-xs opacity-75 uppercase tracking-wider mb-1 font-bold">Your sentence</div>
-                  <div className="text-lg">{selectedTokens.map(t => t.text).join(' ')}</div>
+                  <div className="text-base sm:text-lg break-words">{selectedTokens.map(t => t.text).join(' ')}</div>
                   {/* Show Correct Answer if wrong */}
                   {!(() => {
                     const finalAnswer = selectedTokens.map(t => t.text).join(' ').trim();
@@ -519,7 +519,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                   })() && (
                     <div className="mt-3 pt-3 border-t border-current">
                       <div className="text-xs opacity-75 uppercase tracking-wider mb-1 font-bold">Correct solution</div>
-                      <div className="font-bold text-lg">{Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer[0] : currentQuestion.correctAnswer}</div>
+                      <div className="font-bold text-base sm:text-lg break-words">{Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer[0] : currentQuestion.correctAnswer}</div>
                     </div>
                   )}
                 </div>
@@ -533,7 +533,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
                 value={selectedAnswer || ''}
                 onChange={(e) => setSelectedAnswer(e.target.value)}
                 placeholder="Type your German answer here..."
-                className={`w-full px-5 py-4 rounded-xl border-2 focus:outline-none text-xl font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors
+                className={`w-full p-3.5 sm:px-5 sm:py-4 rounded-xl border-2 focus:outline-none text-base sm:text-xl font-medium bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 transition-colors
                   ${isSubmitted 
                     ? (Array.isArray(currentQuestion.correctAnswer) ? currentQuestion.correctAnswer.includes(selectedAnswer?.trim() || '') : currentQuestion.correctAnswer === selectedAnswer?.trim())
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-900 dark:text-green-100'
@@ -550,13 +550,13 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
 
         {/* Explanation Box */}
         {isSubmitted && (
-          <div className="bg-neutral-50/90 dark:bg-neutral-800/60 p-5 rounded-xl border border-neutral-200/60 dark:border-neutral-700/60 animate-in slide-in-from-top-4 mb-8 flex gap-4">
-            <div className="mt-0.5 text-primary-500 shrink-0"><RotateCcw size={20}/></div>
-            <div className="flex-1">
+          <div className="bg-neutral-50/90 dark:bg-neutral-800/60 p-4 sm:p-5 rounded-xl border border-neutral-200/60 dark:border-neutral-700/60 animate-in slide-in-from-top-4 mb-6 sm:mb-8 flex gap-3 sm:gap-4">
+            <div className="mt-0.5 text-primary-500 shrink-0"><RotateCcw size={18}/></div>
+            <div className="flex-1 min-w-0">
               <h3 className="font-bold mb-1 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Explanation</h3>
-              <p className="text-neutral-800 dark:text-neutral-200 leading-relaxed font-medium">{currentQuestion.explanation}</p>
+              <p className="text-neutral-800 dark:text-neutral-200 leading-relaxed font-medium text-sm sm:text-base break-words">{currentQuestion.explanation}</p>
               {currentQuestion.englishMeaning && (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 italic mt-2 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60">
+                <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 italic mt-2 pt-2 border-t border-neutral-200/60 dark:border-neutral-700/60 break-words">
                   Translation: "{currentQuestion.englishMeaning}"
                 </p>
               )}
@@ -571,7 +571,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
               size="lg" 
               onClick={submitAnswer} 
               disabled={currentQuestion.questionType === 'sentence-building' ? selectedTokens.length === 0 : !selectedAnswer} 
-              className="min-w-[140px] shadow-sm"
+              className="w-full sm:w-auto min-w-[140px] shadow-sm"
             >
               Check Answer
             </Button>
@@ -579,7 +579,7 @@ export function QuizEngine({ questions, topic, title, description, onFinish }: Q
             <Button 
               size="lg" 
               onClick={nextQuestion} 
-              className="min-w-[140px] shadow-sm"
+              className="w-full sm:w-auto min-w-[140px] shadow-sm"
             >
               {currentIndex < questions.length - 1 ? 'Next Question →' : 'Finish Session'}
             </Button>

@@ -33,9 +33,16 @@
 
   body {
     @apply bg-neutral-50/50 text-neutral-900 antialiased selection:bg-primary-200 selection:text-primary-900;
+    overflow-wrap: break-word;
+    word-break: normal;
   }
   .dark body {
     @apply bg-neutral-950 text-neutral-100 selection:bg-primary-900 selection:text-primary-100;
+  }
+
+  /* Safe area padding for mobile bottom bar */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
   }
 
   /* Custom Premium Scrollbar for Desktop */

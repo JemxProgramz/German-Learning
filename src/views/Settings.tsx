@@ -77,34 +77,34 @@ export function SettingsView() {
         </div>
       )}
 
-      <Card className="p-6 md:p-8 shadow-sm">
-        <h2 className="text-xl font-bold mb-6 text-neutral-900 dark:text-neutral-100">Learning Goals</h2>
-        <div className="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-xl border border-neutral-100 dark:border-neutral-700/50 mb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <Card className="p-4 sm:p-6 md:p-8 shadow-sm">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-neutral-900 dark:text-neutral-100">Learning Goals</h2>
+        <div className="bg-neutral-50 dark:bg-neutral-800/50 p-4 sm:p-6 rounded-xl border border-neutral-100 dark:border-neutral-700/50 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex-1">
               <div className="font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Daily Study Target</div>
-              <div className="text-sm text-neutral-500 dark:text-neutral-400">Consistency accelerates your exam readiness.</div>
+              <div className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">Consistency accelerates your exam readiness.</div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
               <select 
                 value={goal} 
                 onChange={(e) => setGoal(Number(e.target.value))}
-                className="p-2.5 px-4 font-medium border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                className="w-full sm:w-auto p-2.5 px-4 font-medium border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
               >
                 <option value={15}>15 minutes</option>
                 <option value={30}>30 minutes</option>
                 <option value={45}>45 minutes</option>
                 <option value={60}>60 minutes</option>
               </select>
-              <Button onClick={handleSaveGoal} className="px-6">Save</Button>
+              <Button onClick={handleSaveGoal} className="w-full sm:w-auto px-6 justify-center">Save</Button>
             </div>
           </div>
         </div>
 
-        <div className="bg-neutral-50 dark:bg-neutral-800/50 p-6 rounded-xl border border-neutral-100 dark:border-neutral-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-neutral-50 dark:bg-neutral-800/50 p-4 sm:p-6 rounded-xl border border-neutral-100 dark:border-neutral-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="font-semibold text-neutral-900 dark:text-neutral-100 mb-1">Hearts System</div>
-            <div className="text-sm text-neutral-500 dark:text-neutral-400">Currently: {progress.hearts} / 5 hearts available.</div>
+            <div className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400">Currently: {progress.hearts} / 5 hearts available.</div>
           </div>
           <Button 
             onClick={() => {
@@ -113,15 +113,16 @@ export function SettingsView() {
             }}
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto justify-center"
           >
             Refill to 5 Hearts
           </Button>
         </div>
       </Card>
 
-      <Card className="p-6 md:p-8 shadow-sm">
-        <h2 className="text-xl font-bold mb-2 text-neutral-900 dark:text-neutral-100">Data Management</h2>
-        <p className="text-neutral-500 dark:text-neutral-400 mb-8">This app saves your progress locally in your browser. You can export a backup or restore from one anytime.</p>
+      <Card className="p-4 sm:p-6 md:p-8 shadow-sm">
+        <h2 className="text-lg sm:text-xl font-bold mb-2 text-neutral-900 dark:text-neutral-100">Data Management</h2>
+        <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 mb-6 sm:mb-8">This app saves your progress locally in your browser. You can export a backup or restore from one anytime.</p>
         
         <input 
           type="file" 
@@ -131,37 +132,37 @@ export function SettingsView() {
           className="hidden" 
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Button onClick={handleExport} variant="outline" size="lg" className="justify-center gap-3 h-14">
-            <Download size={18} /> Backup Progress (JSON)
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <Button onClick={handleExport} variant="outline" size="lg" className="justify-center gap-2 sm:gap-3 text-sm sm:text-base py-3 sm:py-4">
+            <Download size={18} className="shrink-0" /> Backup Progress (JSON)
           </Button>
           <Button 
             onClick={() => fileInputRef.current?.click()} 
             variant="outline" 
             size="lg" 
-            className="justify-center gap-3 h-14"
+            className="justify-center gap-2 sm:gap-3 text-sm sm:text-base py-3 sm:py-4"
           >
-            <Upload size={18} /> Import Backup
+            <Upload size={18} className="shrink-0" /> Import Backup
           </Button>
         </div>
 
-        <div className="mt-10 pt-8 border-t border-neutral-100 dark:border-neutral-800">
-          <div className="bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-neutral-100 dark:border-neutral-800">
+          <div className="bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="font-bold text-red-700 dark:text-red-400 mb-1">Danger Zone</h3>
-              <p className="text-sm text-red-600/80 dark:text-red-300/80">Reset all streaks, answers, mistake history, and lesson completion.</p>
+              <p className="text-xs sm:text-sm text-red-600/80 dark:text-red-300/80">Reset all streaks, answers, mistake history, and lesson completion.</p>
             </div>
             
             {!showResetConfirm ? (
-              <Button onClick={() => setShowResetConfirm(true)} variant="danger" className="shrink-0">
+              <Button onClick={() => setShowResetConfirm(true)} variant="danger" className="w-full sm:w-auto shrink-0 justify-center">
                 <RefreshCw size={18} className="mr-2" /> Reset Progress
               </Button>
             ) : (
-              <div className="flex items-center gap-2">
-                <Button onClick={handleReset} variant="danger" size="sm">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <Button onClick={handleReset} variant="danger" size="sm" className="w-full sm:w-auto justify-center">
                   Confirm Reset
                 </Button>
-                <Button onClick={() => setShowResetConfirm(false)} variant="outline" size="sm">
+                <Button onClick={() => setShowResetConfirm(false)} variant="outline" size="sm" className="w-full sm:w-auto justify-center">
                   Cancel
                 </Button>
               </div>

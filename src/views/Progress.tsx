@@ -45,34 +45,34 @@ export function ProgressView() {
       </header>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckCircle2 size={14}/> Course</div>
-          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{courseCompletion}%</div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <Card className="p-3.5 sm:p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
+          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center gap-1.5"><CheckCircle2 size={14}/> Course</div>
+          <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">{courseCompletion}%</div>
         </Card>
-        <Card className="p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><Clock size={14}/> Time</div>
-          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{Math.floor(progress.totalStudyTimeMinutes / 60)}h {progress.totalStudyTimeMinutes % 60}m</div>
+        <Card className="p-3.5 sm:p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
+          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center gap-1.5"><Clock size={14}/> Time</div>
+          <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">{Math.floor(progress.totalStudyTimeMinutes / 60)}h {progress.totalStudyTimeMinutes % 60}m</div>
         </Card>
-        <Card className="p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><Flame size={14} className="text-orange-500"/> Streak</div>
-          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{progress.currentStreak} <span className="text-sm font-normal text-neutral-400">days</span></div>
+        <Card className="p-3.5 sm:p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
+          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center gap-1.5"><Flame size={14} className="text-orange-500"/> Streak</div>
+          <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">{progress.currentStreak} <span className="text-xs sm:text-sm font-normal text-neutral-400">days</span></div>
         </Card>
-        <Card className="p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><Award size={14}/> Longest</div>
-          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{progress.longestStreak || progress.currentStreak} <span className="text-sm font-normal text-neutral-400">days</span></div>
+        <Card className="p-3.5 sm:p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
+          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center gap-1.5"><Award size={14}/> Longest</div>
+          <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">{progress.longestStreak || progress.currentStreak} <span className="text-xs sm:text-sm font-normal text-neutral-400">days</span></div>
         </Card>
-        <Card className="p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80">
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><Target size={14}/> Accuracy</div>
-          <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{accuracy}%</div>
+        <Card className="p-3.5 sm:p-5 flex flex-col justify-center bg-white dark:bg-neutral-900 border-neutral-200/60 dark:border-neutral-800/80 col-span-2 sm:col-span-1">
+          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1.5 sm:mb-2 flex items-center gap-1.5"><Target size={14}/> Accuracy</div>
+          <div className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-neutral-100">{accuracy}%</div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         {/* Lesson Progress */}
-        <Card className="p-6 md:p-8">
-          <h2 className="text-lg font-bold mb-6 text-neutral-900 dark:text-neutral-100">Tangram Aktuell 1 (A1) Lessons</h2>
-          <div className="space-y-5">
+        <Card className="p-4 sm:p-6 md:p-8">
+          <h2 className="text-base sm:text-lg font-bold mb-4 sm:mb-6 text-neutral-900 dark:text-neutral-100">Tangram Aktuell 1 (A1) Lessons</h2>
+          <div className="space-y-4 sm:space-y-5">
             {lessonKeys.map((lesson) => {
               const p = progress.lessonProgress[lesson] || 0;
               return (

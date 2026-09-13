@@ -174,11 +174,11 @@ export function SchreibenView() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={handleGeneratePrompt}
             disabled={isGeneratingPrompts}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm"
+            className="w-full sm:w-auto justify-center flex items-center gap-2 bg-gradient-to-r from-primary-600 to-indigo-600 text-white shadow-sm text-sm"
           >
             <Sparkles className="w-4 h-4" />
             <span>{isGeneratingPrompts ? 'Generating...' : 'Generate New Task'}</span>
@@ -194,10 +194,10 @@ export function SchreibenView() {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('write')}
-          className={`pb-3 px-4 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'write'
               ? 'border-primary-600 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
@@ -209,7 +209,7 @@ export function SchreibenView() {
 
         <button
           onClick={() => setActiveTab('history')}
-          className={`pb-3 px-4 text-sm font-medium border-b-2 flex items-center gap-2 transition-colors ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap shrink-0 ${
             activeTab === 'history'
               ? 'border-primary-600 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100'
@@ -262,7 +262,7 @@ export function SchreibenView() {
           </div>
 
           {/* Task Prompt Card */}
-          <Card className="p-6 border border-neutral-200 dark:border-neutral-800 space-y-4">
+          <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-neutral-800 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -271,17 +271,17 @@ export function SchreibenView() {
                   </span>
                   <span className="text-xs text-neutral-500 capitalize">{activePrompt.topic}</span>
                 </div>
-                <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+                <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 break-words">
                   {activePrompt.title}
                 </h2>
               </div>
             </div>
 
-            <div className="p-4 bg-neutral-50 dark:bg-neutral-800/40 rounded-xl border border-neutral-100 dark:border-neutral-800 text-sm space-y-1">
-              <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+            <div className="p-3.5 sm:p-4 bg-neutral-50 dark:bg-neutral-800/40 rounded-xl border border-neutral-100 dark:border-neutral-800 text-xs sm:text-sm space-y-1">
+              <p className="font-semibold text-neutral-900 dark:text-neutral-100 break-words">
                 {activePrompt.prompt}
               </p>
-              <p className="text-xs text-neutral-500 italic">
+              <p className="text-xs text-neutral-500 italic break-words">
                 {activePrompt.promptEnglish}
               </p>
             </div>
@@ -294,10 +294,10 @@ export function SchreibenView() {
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-700 dark:text-neutral-300">
                 {activePrompt.guidingPoints.map((pt, i) => (
                   <li key={i} className="flex items-center gap-2 bg-white dark:bg-neutral-900 p-2 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                    <span className="w-4 h-4 rounded-full bg-primary-100 dark:bg-primary-950/60 text-primary-700 dark:text-primary-400 flex items-center justify-center font-bold text-[10px]">
+                    <span className="w-4 h-4 rounded-full bg-primary-100 dark:bg-primary-950/60 text-primary-700 dark:text-primary-400 flex items-center justify-center font-bold text-[10px] shrink-0">
                       {i + 1}
                     </span>
-                    <span>{pt}</span>
+                    <span className="break-words">{pt}</span>
                   </li>
                 ))}
               </ul>
@@ -306,13 +306,13 @@ export function SchreibenView() {
             {activePrompt.targetGrammar && (
               <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800">
                 <Lightbulb className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                <span>Grammar focus: <strong>{activePrompt.targetGrammar}</strong></span>
+                <span className="break-words">Grammar focus: <strong>{activePrompt.targetGrammar}</strong></span>
               </div>
             )}
           </Card>
 
           {/* Text Area & Submit */}
-          <Card className="p-6 border border-neutral-200 dark:border-neutral-800 space-y-4">
+          <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-neutral-800 space-y-4">
             <div className="relative">
               <textarea
                 value={userText}
@@ -320,25 +320,26 @@ export function SchreibenView() {
                 placeholder="Schreiben Sie Ihren Text hier auf Deutsch..."
                 rows={6}
                 disabled={isEvaluating}
-                className="w-full p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm leading-relaxed"
+                className="w-full p-3 sm:p-4 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm leading-relaxed"
               />
             </div>
 
             {/* Word count status & Submit */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs">
-                <span className={`w-2 h-2 rounded-full ${wordCount >= activePrompt.minWords ? 'bg-emerald-500' : 'bg-orange-500'}`} />
+                <span className={`w-2 h-2 rounded-full shrink-0 ${wordCount >= activePrompt.minWords ? 'bg-emerald-500' : 'bg-orange-500'}`} />
                 <span className={`font-semibold ${wordCount >= activePrompt.minWords ? 'text-emerald-600 dark:text-emerald-400' : 'text-neutral-500'}`}>
                   {wordCount} / {activePrompt.minWords} words required
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 {feedback && (
                   <Button
                     variant="outline"
                     onClick={handleResetForNewPrompt}
                     size="sm"
+                    className="flex-1 sm:flex-none justify-center"
                   >
                     Clear / Try Again
                   </Button>
@@ -347,10 +348,10 @@ export function SchreibenView() {
                   onClick={handleSubmitWriting}
                   disabled={wordCount < 5 || isEvaluating}
                   size="sm"
-                  className="flex items-center gap-2 bg-primary-600 text-white"
+                  className="flex-1 sm:flex-none justify-center flex items-center gap-2 bg-primary-600 text-white"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>{isEvaluating ? 'Evaluating with AI...' : 'Submit & Check'}</span>
+                  <span>{isEvaluating ? 'Evaluating...' : 'Submit & Check'}</span>
                 </Button>
               </div>
             </div>
@@ -358,7 +359,7 @@ export function SchreibenView() {
 
           {/* AI / Evaluator Feedback Output */}
           {feedback && (
-            <Card className="p-6 md:p-8 border border-neutral-200 dark:border-neutral-800 space-y-6 animate-in fade-in">
+            <Card className="p-4 sm:p-6 md:p-8 border border-neutral-200 dark:border-neutral-800 space-y-6 animate-in fade-in">
               {/* Score Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-5">
                 <div>

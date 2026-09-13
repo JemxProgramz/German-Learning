@@ -113,6 +113,8 @@ export function LearningPathView({ onNavigate }: { onNavigate?: (view: string) =
                       onNavigate(viewTarget);
                     }
                   }}
+                  title={`Lesson ${node.lesson}${node.isCheckpoint ? ' (Checkpoint Exam)' : ''}${isCompleted ? ' - Completed' : isCurrent ? ' - Ready to start' : isLocked ? ' - Locked' : ''}`}
+                  aria-label={`Lesson ${node.lesson}${node.isCheckpoint ? ' Checkpoint Exam' : ''}${isCompleted ? ' Completed' : isCurrent ? ' Current lesson' : isLocked ? ' Locked' : ''}`}
                   className={`relative ${node.isCheckpoint ? 'w-20 h-20' : 'w-16 h-16'} rounded-full flex items-center justify-center border-2 border-b-[6px] transition-all hover:scale-105 hover:brightness-110 active:scale-95 active:border-b-2 active:translate-y-1 ${bgClass} ${borderClass} ${shadowClass}`}
                   disabled={isLocked}
                 >

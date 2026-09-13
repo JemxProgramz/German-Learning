@@ -98,8 +98,9 @@ export function HorenView() {
     }
   };
 
-  const startSession = (count?: number) => {
-    const pool = count ? [...filteredExercises].sort(() => Math.random() - 0.5).slice(0, count) : [...filteredExercises];
+  const startSession = (customPool?: ListeningExercise[], count?: number) => {
+    const base = customPool && customPool.length > 0 ? customPool : filteredExercises;
+    const pool = count ? [...base].sort(() => Math.random() - 0.5).slice(0, count) : [...base];
     if (pool.length === 0) return;
 
     setExercisePool(pool);
@@ -471,8 +472,7 @@ export function HorenView() {
           <Button
             onClick={() => {
               const transPool = filteredExercises.filter(e => e.type === 'transcription');
-              setExercisePool(transPool.length > 0 ? transPool : filteredExercises);
-              startSession(transPool.length);
+              startSession(transPool, transPool.length);
             }}
             className="w-full justify-center mt-6"
           >
@@ -495,8 +495,7 @@ export function HorenView() {
           <Button
             onClick={() => {
               const meaningPool = filteredExercises.filter(e => e.type === 'meaning');
-              setExercisePool(meaningPool.length > 0 ? meaningPool : filteredExercises);
-              startSession(meaningPool.length);
+              startSession(meaningPool, meaningPool.length);
             }}
             variant="secondary"
             className="w-full justify-center mt-6"
@@ -520,8 +519,7 @@ export function HorenView() {
           <Button
             onClick={() => {
               const dialoguePool = filteredExercises.filter(e => e.type === 'dialogue-comprehension');
-              setExercisePool(dialoguePool.length > 0 ? dialoguePool : filteredExercises);
-              startSession(dialoguePool.length);
+              startSession(dialoguePool, dialoguePool.length);
             }}
             variant="outline"
             className="w-full justify-center mt-6"

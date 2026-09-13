@@ -41,7 +41,7 @@ function MainApp() {
       case 'schreiben': return <SchreibenView />;
       case 'sprechen': return <SprechenView />;
       case 'mocktest': return <MockTestView />;
-      case 'mistakes': return <MistakesView />;
+      case 'mistakes': return <MistakesView onNavigate={setCurrentView} />;
       case 'progress': return <ProgressView />;
       case 'settings': return <SettingsView />;
       default: return <Dashboard onNavigate={setCurrentView} />;

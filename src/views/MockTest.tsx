@@ -488,7 +488,7 @@ export function MockTestView() {
                   title="Open question grid"
                 >
                   <Grid3X3 size={13} />
-                  <span>{currentIdx + 1}/35</span>
+                  <span>{currentIdx + 1}/{MOCK_EXAM_QUESTIONS.length}</span>
                 </Button>
                 <Button
                   variant="danger"

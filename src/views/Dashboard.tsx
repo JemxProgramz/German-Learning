@@ -95,8 +95,16 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               ].map((plan) => (
                 <div 
                   key={plan.num}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onNavigate(plan.action)}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/80 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-sm cursor-pointer transition-all group"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onNavigate(plan.action);
+                    }
+                  }}
+                  className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200/60 dark:border-neutral-800/80 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-sm cursor-pointer transition-all group focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <div className="text-neutral-300 dark:text-neutral-700 font-mono font-bold text-lg">{plan.num}</div>
                   <div className="flex-1">
@@ -135,7 +143,20 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 { l: 'L7', p: 0 },
                 { l: 'L8', p: 0 },
               ].map((lesson, idx) => (
-                <div key={idx} className="flex flex-col items-center flex-1 gap-2 cursor-pointer group">
+                <div 
+                  key={idx} 
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onNavigate('learning-path')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onNavigate('learning-path');
+                    }
+                  }}
+                  title={`Open Lesson ${idx + 1} on Learning Path`}
+                  className="flex flex-col items-center flex-1 gap-2 cursor-pointer group focus:outline-none focus:ring-1 focus:ring-primary-500 rounded p-0.5"
+                >
                   <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-sm h-1.5 overflow-hidden">
                     <div className="bg-primary-500 h-full" style={{ width: `${lesson.p}%` }}></div>
                   </div>

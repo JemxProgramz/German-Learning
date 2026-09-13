@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { UserProgress, Mistake, StudySession, MockTestResult, Topic } from '../types';
+import { UserProgress, Mistake, StudySession, MockTestResult, Topic, VocabularyWord, WritingSubmission } from '../types';
 
 const STORAGE_KEY = 'german_a1_progress';
 
@@ -23,14 +23,30 @@ const defaultProgress: UserProgress = {
     lesen: { answered: 0, correct: 0 },
     schreiben: { answered: 0, correct: 0 },
     sprechen: { answered: 0, correct: 0 },
+    quiz: { answered: 0, correct: 0 },
   },
   vocabularyStatus: {},
+  vocabularySRS: {},
+  customVocabWords: [],
   sessions: [],
   mockTestResults: [],
   mistakes: [],
   xp: 0,
   hearts: 5,
   lastHeartRegenTime: null,
+  writingSubmissions: [],
+  writingMistakePatterns: {},
+  listeningStats: {
+    completed: 0,
+    correct: 0,
+    byType: {}
+  },
+  quizStats: {
+    completed: 0,
+    correct: 0,
+    endlessHighScore: 0,
+    byTopic: {}
+  }
 };
 
 interface ProgressContextType {
@@ -49,6 +65,11 @@ interface ProgressContextType {
   addXP: (amount: number) => void;
   completeLesson: (lessonId: number) => void;
   refillHearts: () => void;
+  addCustomVocabWords: (words: VocabularyWord[]) => void;
+  recordVocabSRSReview: (wordId: string, quality: 'again' | 'hard' | 'good' | 'easy') => void;
+  recordWritingSubmission: (submission: WritingSubmission) => void;
+  recordQuizResult: (topic: string, correct: number, total: number, isEndless?: boolean) => void;
+  recordListeningResult: (exerciseId: string, exerciseType: string, isCorrect: boolean) => void;
 }
 
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
@@ -291,6 +312,152 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const addCustomVocabWords = (newWords: VocabularyWord[]) => {
+    setProgress(prev => {
+      const existing = prev.customVocabWords || [];
+      const existingIds = new Set(existing.map(w => w.id));
+      const filtered = newWords.filter(w => !existingIds.has(w.id));
+      return {
+        ...prev,
+        customVocabWords: [...filtered, ...existing]
+      };
+    });
+  };
+
+  const recordVocabSRSReview = (wordId: string, quality: 'again' | 'hard' | 'good' | 'easy') => {
+    setProgress(prev => {
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      const srsMap = prev.vocabularySRS ? { ...prev.vocabularySRS } : {};
+      const current = srsMap[wordId] || {
+        interval: 1,
+        easeFactor: 2.5,
+        dueDate: todayStr,
+        consecutiveCorrect: 0,
+        mistakesCount: 0
+      };
+
+      let interval = current.interval;
+      let easeFactor = current.easeFactor;
+      let consecutiveCorrect = current.consecutiveCorrect;
+      let mistakesCount = current.mistakesCount;
+
+      if (quality === 'again') {
+        consecutiveCorrect = 0;
+        interval = 1;
+        mistakesCount += 1;
+        easeFactor = Math.max(1.3, easeFactor - 0.2);
+      } else if (quality === 'hard') {
+        consecutiveCorrect += 1;
+        interval = Math.max(1, Math.round(interval * 1.2));
+        easeFactor = Math.max(1.3, easeFactor - 0.15);
+      } else if (quality === 'good') {
+        consecutiveCorrect += 1;
+        interval = consecutiveCorrect === 1 ? 1 : consecutiveCorrect === 2 ? 3 : Math.round(interval * easeFactor);
+      } else { // easy
+        consecutiveCorrect += 1;
+        interval = consecutiveCorrect === 1 ? 2 : consecutiveCorrect === 2 ? 4 : Math.round(interval * easeFactor * 1.3);
+        easeFactor = Math.min(3.0, easeFactor + 0.15);
+      }
+
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + interval);
+      const dueDate = nextDate.toISOString().split('T')[0];
+
+      srsMap[wordId] = {
+        interval,
+        easeFactor,
+        dueDate,
+        consecutiveCorrect,
+        mistakesCount,
+        lastReviewed: todayStr
+      };
+
+      // Also update vocabularyStatus
+      const newStatus = { ...prev.vocabularyStatus };
+      if (quality === 'again') {
+        newStatus[wordId] = 'learning';
+      } else if (consecutiveCorrect >= 4) {
+        newStatus[wordId] = 'mastered';
+      } else {
+        newStatus[wordId] = 'review';
+      }
+
+      let updated = updateStreak(prev, todayStr);
+      return {
+        ...updated,
+        vocabularySRS: srsMap,
+        vocabularyStatus: newStatus
+      };
+    });
+  };
+
+  const recordWritingSubmission = (submission: WritingSubmission) => {
+    setProgress(prev => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const patterns = { ...(prev.writingMistakePatterns || {}) };
+      submission.feedback.mistakeCategories.forEach(cat => {
+        patterns[cat] = (patterns[cat] || 0) + 1;
+      });
+
+      let updated = updateStreak(prev, todayStr);
+      return {
+        ...updated,
+        writingSubmissions: [submission, ...(prev.writingSubmissions || [])],
+        writingMistakePatterns: patterns
+      };
+    });
+  };
+
+  const recordQuizResult = (topic: string, correct: number, total: number, isEndless: boolean = false) => {
+    setProgress(prev => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const currentStats = prev.quizStats || { completed: 0, correct: 0, endlessHighScore: 0, byTopic: {} };
+      const byTopic = { ...currentStats.byTopic };
+      const currentTopic = byTopic[topic] || { answered: 0, correct: 0 };
+      byTopic[topic] = {
+        answered: currentTopic.answered + total,
+        correct: currentTopic.correct + correct
+      };
+
+      const endlessHighScore = isEndless ? Math.max(currentStats.endlessHighScore || 0, correct) : (currentStats.endlessHighScore || 0);
+
+      let updated = updateStreak(prev, todayStr);
+      return {
+        ...updated,
+        quizStats: {
+          completed: currentStats.completed + total,
+          correct: currentStats.correct + correct,
+          endlessHighScore,
+          byTopic
+        }
+      };
+    });
+  };
+
+  const recordListeningResult = (exerciseId: string, exerciseType: string, isCorrect: boolean) => {
+    setProgress(prev => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const currentStats = prev.listeningStats || { completed: 0, correct: 0, byType: {} };
+      const byType = { ...currentStats.byType };
+      const typeData = byType[exerciseType] || { answered: 0, correct: 0 };
+      byType[exerciseType] = {
+        answered: typeData.answered + 1,
+        correct: typeData.correct + (isCorrect ? 1 : 0)
+      };
+
+      let updated = updateStreak(prev, todayStr);
+      return {
+        ...updated,
+        listeningStats: {
+          completed: currentStats.completed + 1,
+          correct: currentStats.correct + (isCorrect ? 1 : 0),
+          byType
+        }
+      };
+    });
+  };
+
   const importProgress = (data: string): boolean => {
     try {
       const parsed = JSON.parse(data);
@@ -319,7 +486,12 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       addHeart,
       addXP,
       completeLesson,
-      refillHearts
+      refillHearts,
+      addCustomVocabWords,
+      recordVocabSRSReview,
+      recordWritingSubmission,
+      recordQuizResult,
+      recordListeningResult
     }}>
       {children}
     </ProgressContext.Provider>

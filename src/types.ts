@@ -1,4 +1,4 @@
-export type Difficulty = 'A1' | 'A1+' | 'A2';
+export type Difficulty = 'A1' | 'A1+' | 'A2' | 'B1';
 
 export type QuestionType = 
   | 'multiple-choice' 
@@ -6,7 +6,9 @@ export type QuestionType =
   | 'matching' 
   | 'sentence-building'
   | 'true-false'
-  | 'typing';
+  | 'typing'
+  | 'translation-de-en'
+  | 'translation-en-de';
 
 export type Topic = 
   | 'vocabulary' 
@@ -16,7 +18,8 @@ export type Topic =
   | 'hören' 
   | 'lesen' 
   | 'schreiben' 
-  | 'sprechen';
+  | 'sprechen'
+  | 'quiz';
 
 export interface Question {
   id: string;
@@ -35,13 +38,25 @@ export interface Question {
 
 export interface VocabularyWord {
   id: string;
-  lesson: number;
+  lesson?: number;
   german: string;
   english: string;
   article?: 'der' | 'die' | 'das';
   plural?: string;
   example: string;
   exampleEnglish: string;
+  difficulty?: Difficulty;
+  topic?: string;
+  isCustom?: boolean;
+}
+
+export interface SRSItem {
+  interval: number; // in days
+  easeFactor: number; // e.g. 2.5
+  dueDate: string; // ISO date string
+  consecutiveCorrect: number;
+  mistakesCount: number;
+  lastReviewed?: string;
 }
 
 export interface GrammarTopic {
@@ -82,6 +97,58 @@ export interface Mistake {
   timesCorrectSinceMistake: number;
 }
 
+export interface ListeningExercise {
+  id: string;
+  type: 'transcription' | 'meaning' | 'dialogue-comprehension';
+  level: Difficulty;
+  topic: string;
+  germanText: string;
+  speakerRole?: string;
+  question?: string;
+  options?: string[];
+  correctAnswer: string;
+  englishTranslation: string;
+  explanation: string;
+}
+
+export interface WritingPrompt {
+  id: string;
+  title: string;
+  level: Difficulty;
+  topic: string;
+  prompt: string;
+  promptEnglish: string;
+  guidingPoints: string[];
+  minWords: number;
+  targetGrammar?: string;
+}
+
+export interface WritingCorrection {
+  original: string;
+  corrected: string;
+  explanation: string;
+  mistakeType: 'Noun Capitalization' | 'Word Order' | 'Verb Conjugation' | 'Case (Akk/Dat)' | 'Preposition' | 'Spelling' | 'Vocabulary';
+}
+
+export interface WritingFeedback {
+  score: number; // 0 - 100
+  cefrRating: Difficulty;
+  summary: string;
+  correctedText: string;
+  corrections: WritingCorrection[];
+  strengths: string[];
+  mistakeCategories: string[];
+}
+
+export interface WritingSubmission {
+  id: string;
+  promptId: string;
+  promptTitle: string;
+  userText: string;
+  date: string;
+  feedback: WritingFeedback;
+}
+
 export interface UserProgress {
   currentStreak: number;
   longestStreak: number;
@@ -98,6 +165,8 @@ export interface UserProgress {
   skillProgress: Record<Topic, { answered: number; correct: number }>;
   
   vocabularyStatus: Record<string, 'new' | 'learning' | 'review' | 'mastered'>;
+  vocabularySRS?: Record<string, SRSItem>;
+  customVocabWords?: VocabularyWord[];
   
   sessions: StudySession[];
   mockTestResults: MockTestResult[];
@@ -107,4 +176,20 @@ export interface UserProgress {
   xp: number;
   hearts: number;
   lastHeartRegenTime: string | null;
+
+  // Cross-cutting modular progress
+  writingSubmissions?: WritingSubmission[];
+  writingMistakePatterns?: Record<string, number>;
+  listeningStats?: {
+    completed: number;
+    correct: number;
+    byType: Record<string, { answered: number; correct: number }>;
+  };
+  quizStats?: {
+    completed: number;
+    correct: number;
+    endlessHighScore: number;
+    byTopic: Record<string, { answered: number; correct: number }>;
+  };
 }
+

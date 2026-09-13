@@ -87,10 +87,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-neutral-100">Today's Plan</h2>
             <div className="space-y-3">
               {[
-                { num: '01', title: 'Wortschatz', time: '10 min', meta: '15 words', action: 'vocabulary' },
-                { num: '02', title: 'Grammatik', time: '8 min', meta: '10 questions', action: 'grammatik' },
-                { num: '03', title: 'Hören', time: '7 min', meta: '1 exercise', action: 'horen' },
-                { num: '04', title: 'Exam Practice', time: '5 min', meta: 'Mock test', action: 'mocktest' }
+                { num: '01', title: 'Wortschatz (Vocabulary & SRS)', time: '10 min', meta: 'Spaced Repetition & Bank', action: 'vocabulary' },
+                { num: '02', title: 'Quiz & Challenge', time: '8 min', meta: 'Targeted & Endless Mode', action: 'quiz' },
+                { num: '03', title: 'Hören (Listening)', time: '7 min', meta: 'Diktat & Audio Tasks', action: 'horen' },
+                { num: '04', title: 'Schreiben (Writing)', time: '8 min', meta: 'AI Grammar Evaluation', action: 'schreiben' },
+                { num: '05', title: 'Goethe-Zertifikat Exam', time: '15 min', meta: 'Full Mock Test', action: 'mocktest' }
               ].map((plan) => (
                 <div 
                   key={plan.num}

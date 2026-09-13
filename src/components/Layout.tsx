@@ -64,6 +64,7 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
     {
       title: 'Practice',
       items: [
+        { id: 'quiz', label: 'Quiz', icon: Zap },
         { id: 'horen', label: 'Hören', icon: Headphones },
         { id: 'lesen', label: 'Lesen', icon: BookText },
         { id: 'schreiben', label: 'Schreiben', icon: PenLine },

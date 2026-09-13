@@ -17,6 +17,7 @@ import { HorenView } from './views/Horen';
 import { LesenView } from './views/Lesen';
 import { SchreibenView } from './views/Schreiben';
 import { SprechenView } from './views/Sprechen';
+import { QuizView } from './views/QuizView';
 import { MockTestView } from './views/MockTest';
 import { MistakesView } from './views/Mistakes';
 import { ProgressView } from './views/Progress';
@@ -33,6 +34,7 @@ function MainApp() {
       case 'artikel': return <ArtikelView />;
       case 'satzbildung': return <SatzbildungView />;
       case 'grammatik': return <GrammatikView />;
+      case 'quiz': return <QuizView />;
       case 'hören': 
       case 'horen': return <HorenView />;
       case 'lesen': return <LesenView />;

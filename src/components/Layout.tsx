@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, BookOpen, Languages, PenLine, FileText, Headphones, BookText, 
-  Mic, ClipboardCheck, RotateCcw, ChartNoAxesColumn, Settings, Menu, X, Moon, Sun, PanelLeftClose, PanelLeft, Flame, BookMarked, Map as MapIcon
+  Mic, ClipboardCheck, RotateCcw, ChartNoAxesColumn, Settings, Menu, X, Moon, Sun, PanelLeftClose, PanelLeft, Flame, BookMarked, Map as MapIcon,
+  Heart, Zap
 } from 'lucide-react';
 import { useTheme } from '../store/ThemeContext';
 import { useProgress } from '../store/ProgressContext';
@@ -108,6 +109,9 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
           A1 Trainer
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-red-500 font-bold">
+            <Heart size={18} className="fill-current" /> {progress?.hearts || 0}
+          </div>
           <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-bold">
             <Flame size={18} className="fill-current" /> {progress?.currentStreak || 0}
           </div>
@@ -251,6 +255,14 @@ export function Layout({ children, currentView, onNavigate }: LayoutProps) {
             {currentView.replace('-', ' ')}
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-sm font-medium text-red-500">
+              <Heart size={16} className="fill-current" />
+              {progress?.hearts || 0}
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-sm font-medium text-yellow-500">
+              <Zap size={16} className="fill-current" />
+              {progress?.xp || 0} XP
+            </div>
             <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full shadow-sm text-sm font-medium">
               <Flame size={16} className="text-orange-500 fill-orange-500" />
               {progress?.currentStreak || 0}

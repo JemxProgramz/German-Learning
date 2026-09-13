@@ -18,7 +18,7 @@ const PATH_NODES = Array.from({ length: 25 }, (_, i) => {
   };
 });
 
-export function LearningPathView() {
+export function LearningPathView({ onNavigate }: { onNavigate?: (view: string) => void }) {
   const { progress } = useProgress();
   const pathContainerRef = useRef<HTMLDivElement>(null);
   
@@ -105,6 +105,14 @@ export function LearningPathView() {
                 )}
                 
                 <button 
+                  onClick={() => {
+                    if (!isLocked && onNavigate) {
+                      // Logic to pick the right view based on the node's Icon or index
+                      const views = ['vocabulary', 'horen', 'schreiben', 'sprechen'];
+                      const viewTarget = node.isCheckpoint ? 'mocktest' : views[index % views.length];
+                      onNavigate(viewTarget);
+                    }
+                  }}
                   className={`relative ${node.isCheckpoint ? 'w-20 h-20' : 'w-16 h-16'} rounded-full flex items-center justify-center border-2 border-b-[6px] transition-all hover:scale-105 hover:brightness-110 active:scale-95 active:border-b-2 active:translate-y-1 ${bgClass} ${borderClass} ${shadowClass}`}
                   disabled={isLocked}
                 >

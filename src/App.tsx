@@ -28,7 +28,7 @@ function MainApp() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard': return <Dashboard onNavigate={setCurrentView} />;
-      case 'learning-path': return <LearningPathView />;
+      case 'learning-path': return <LearningPathView onNavigate={setCurrentView} />;
       case 'vocabulary': return <VocabularyView />;
       case 'artikel': return <ArtikelView />;
       case 'satzbildung': return <SatzbildungView />;

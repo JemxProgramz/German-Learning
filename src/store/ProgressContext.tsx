@@ -28,6 +28,9 @@ const defaultProgress: UserProgress = {
   sessions: [],
   mockTestResults: [],
   mistakes: [],
+  xp: 0,
+  hearts: 5,
+  lastHeartRegenTime: null,
 };
 
 interface ProgressContextType {
@@ -41,6 +44,10 @@ interface ProgressContextType {
   updateVocabularyStatus: (wordId: string, status: 'new' | 'learning' | 'review' | 'mastered') => void;
   resetProgress: () => void;
   importProgress: (data: string) => void;
+  loseHeart: () => void;
+  addXP: (amount: number) => void;
+  completeLesson: (lessonId: number) => void;
+  refillHearts: () => void;
 }
 
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
@@ -188,6 +195,48 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+
+  const loseHeart = () => {
+    setProgress(prev => {
+      if (prev.hearts <= 0) return prev;
+      const newHearts = prev.hearts - 1;
+      return {
+        ...prev,
+        hearts: newHearts,
+        lastHeartRegenTime: newHearts < 5 && !prev.lastHeartRegenTime ? new Date().toISOString() : prev.lastHeartRegenTime
+      };
+    });
+  };
+
+  const addXP = (amount: number) => {
+    setProgress(prev => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      let newProgress = updateStreak(prev, todayStr);
+      newProgress.xp = (newProgress.xp || 0) + amount;
+      return newProgress;
+    });
+  };
+
+  const completeLesson = (lessonId: number) => {
+    setProgress(prev => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      let newProgress = updateStreak(prev, todayStr);
+      newProgress.lessonProgress = {
+        ...newProgress.lessonProgress,
+        [lessonId]: 100
+      };
+      return newProgress;
+    });
+  };
+
+  const refillHearts = () => {
+    setProgress(prev => ({
+      ...prev,
+      hearts: 5,
+      lastHeartRegenTime: null
+    }));
+  };
+
   const importProgress = (data: string) => {
     try {
       const parsed = JSON.parse(data);
@@ -208,7 +257,11 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
       addMockTestResult,
       updateVocabularyStatus,
       resetProgress,
-      importProgress
+      importProgress,
+      loseHeart,
+      addXP,
+      completeLesson,
+      refillHearts
     }}>
       {children}
     </ProgressContext.Provider>

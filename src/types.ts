@@ -102,4 +102,9 @@ export interface UserProgress {
   sessions: StudySession[];
   mockTestResults: MockTestResult[];
   mistakes: Mistake[];
+  
+  // Duolingo-style additions
+  xp: number;
+  hearts: number;
+  lastHeartRegenTime: string | null;
 }

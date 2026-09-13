@@ -1,0 +1,6 @@
+{
+  "name": "German A1 Exam Trainer",
+  "description": "A serious, clean language-learning and exam-preparation tool for German A1/A2.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

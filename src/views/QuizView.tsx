@@ -6,6 +6,7 @@ import { QUESTIONS, VOCABULARY } from '../data/content';
 import { ORIGINAL_VOCAB_BANK, generateQuizFromVocab } from '../data/vocabBank';
 import { useProgress } from '../store/ProgressContext';
 import { speakGerman } from '../utils/speech';
+import { SessionSummary } from '../components/SessionSummary';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -262,36 +263,17 @@ export function QuizView() {
     const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
 
     return (
-      <div className="max-w-md mx-auto py-12 text-center animate-in fade-in space-y-6">
-        <Card className="p-8 border border-neutral-200 dark:border-neutral-800">
-          <Award className="w-16 h-16 text-primary-600 mx-auto mb-4 animate-bounce" />
-          <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-            {isEndlessMode ? 'Endless Run Completed!' : 'Quiz Complete!'}
-          </h2>
-          <p className="text-sm text-neutral-500 mt-1">
-            {isEndlessMode ? `You answered ${correctCount} questions correctly!` : `You scored ${correctCount} out of ${total} (${pct}%)`}
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 my-6 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-            <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl">
-              <div className="text-xs text-neutral-500">Correct Answers</div>
-              <div className="text-2xl font-bold text-emerald-600">{correctCount}</div>
-            </div>
-            <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl">
-              <div className="text-xs text-neutral-500">XP Earned</div>
-              <div className="text-2xl font-bold text-primary-600">+{correctCount * 10}</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Button onClick={() => startQuiz(questionCount, isEndlessMode)} className="w-full justify-center">
-              Play Again
-            </Button>
-            <Button onClick={() => setActiveQuiz(false)} variant="outline" className="w-full justify-center">
-              Back to Quiz Hub
-            </Button>
-          </div>
-        </Card>
+      <div className="py-8 animate-in fade-in">
+        <SessionSummary
+          title={isEndlessMode ? "Endless Practice Complete!" : "Quiz Complete!"}
+          subtitle={isEndlessMode ? "High endurance workout in German." : "Great effort! Your German comprehension is expanding."}
+          xpEarned={correctCount * 10}
+          correctAnswers={correctCount}
+          totalQuestions={total}
+          accuracyPercentage={pct}
+          onContinue={() => setActiveQuiz(false)}
+          onRetry={() => startQuiz(questionCount, isEndlessMode)}
+        />
       </div>
     );
   }

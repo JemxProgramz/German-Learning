@@ -7,6 +7,8 @@ import { ORIGINAL_VOCAB_BANK, VOCAB_TOPICS, generateProceduralVocab } from '../d
 import { useProgress } from '../store/ProgressContext';
 import { Volume2, Sparkles, RefreshCw, BookOpen, Clock, Layers, Search, Filter } from 'lucide-react';
 import { speakGerman } from '../utils/speech';
+import { prioritizeItemsBySRS } from '../utils/srs';
+import { SessionSummary } from '../components/SessionSummary';
 
 export function VocabularyView() {
   const { 
@@ -35,6 +37,8 @@ export function VocabularyView() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<number>(0);
+  const [sessionStats, setSessionStats] = useState({ correct: 0, total: 0, xp: 0 });
+  const [sessionSummaryData, setSessionSummaryData] = useState<{ xp: number; correct: number; total: number } | null>(null);
 
   // Combine all vocab sources: legacy content + original expanded bank + custom generated words
   const allVocab = useMemo<VocabularyWord[]>(() => {
@@ -128,34 +132,61 @@ export function VocabularyView() {
   };
 
   const startSession = (wordList: VocabularyWord[], count?: number) => {
-    const pool = count ? [...wordList].sort(() => Math.random() - 0.5).slice(0, count) : [...wordList];
+    // Surface items that are due for spaced repetition review first
+    const prioritized = prioritizeItemsBySRS(wordList, progress.vocabularySRS).sorted;
+    const pool = count ? prioritized.slice(0, count) : prioritized;
     if (pool.length === 0) return;
 
     setCards(pool);
     setCurrentIndex(0);
     setIsFlipped(false);
+    setSessionStats({ correct: 0, total: 0, xp: 0 });
+    setSessionSummaryData(null);
     setActiveSession(true);
     setSessionStartTime(Date.now());
   };
 
-  const endSession = () => {
+  const endSession = (finalCorrect?: number, finalTotal?: number, finalXP?: number) => {
     const durationMinutes = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
-    addStudySession({
-      durationMinutes,
-      topics: ['vocabulary'],
-      questionsAnswered: currentIndex,
-      correctAnswers: currentIndex
-    });
-    addXP(currentIndex * 2);
+    const c = finalCorrect !== undefined ? finalCorrect : sessionStats.correct;
+    const t = finalTotal !== undefined ? finalTotal : sessionStats.total;
+    const sessionBonusXP = t >= 5 ? 10 : 0;
+    const earnedXP = (finalXP !== undefined ? finalXP : sessionStats.xp) + sessionBonusXP;
+
+    if (t > 0) {
+      addStudySession({
+        durationMinutes,
+        topics: ['vocabulary'],
+        questionsAnswered: t,
+        correctAnswers: c
+      });
+      addXP(earnedXP);
+      setSessionSummaryData({
+        xp: earnedXP,
+        correct: c,
+        total: t
+      });
+    }
     setActiveSession(false);
   };
 
   const handleResponse = (quality: 'again' | 'hard' | 'good' | 'easy') => {
     const currentCard = cards[currentIndex];
     const isSuccess = quality !== 'again';
+    const cardXP = isSuccess ? (quality === 'easy' ? 6 : quality === 'good' ? 5 : 3) : 1;
 
     recordAnswer('vocabulary', isSuccess);
     recordVocabSRSReview(currentCard.id, quality);
+
+    const nextCorrect = sessionStats.correct + (isSuccess ? 1 : 0);
+    const nextTotal = sessionStats.total + 1;
+    const nextXP = sessionStats.xp + cardXP;
+
+    setSessionStats({
+      correct: nextCorrect,
+      total: nextTotal,
+      xp: nextXP
+    });
 
     if (quality === 'again') {
       addMistake({
@@ -172,7 +203,7 @@ export function VocabularyView() {
       setCurrentIndex(prev => prev + 1);
       setIsFlipped(false);
     } else {
-      endSession();
+      endSession(nextCorrect, nextTotal, nextXP);
     }
   };
 
@@ -181,6 +212,26 @@ export function VocabularyView() {
     e.stopPropagation();
     speakGerman(text);
   };
+
+  // Render Session Summary if completed
+  if (sessionSummaryData) {
+    return (
+      <div className="py-8 animate-in fade-in">
+        <SessionSummary
+          title="Vocabulary Practice Complete!"
+          subtitle="Flashcard retention recorded into your Spaced Repetition queue."
+          xpEarned={sessionSummaryData.xp}
+          correctAnswers={sessionSummaryData.correct}
+          totalQuestions={sessionSummaryData.total}
+          onContinue={() => setSessionSummaryData(null)}
+          onRetry={() => {
+            setSessionSummaryData(null);
+            startSession(filteredVocab, 10);
+          }}
+        />
+      </div>
+    );
+  }
 
   // Render Active Flashcard Session
   if (activeSession) {

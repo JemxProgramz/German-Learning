@@ -5,6 +5,7 @@ import { ListeningExercise, Difficulty } from '../types';
 import { ORIGINAL_LISTENING_EXERCISES, generateProceduralListening } from '../data/listeningBank';
 import { useProgress } from '../store/ProgressContext';
 import { speakGerman } from '../utils/speech';
+import { SessionSummary } from '../components/SessionSummary';
 import { 
   Headphones, 
   Volume2, 
@@ -174,36 +175,17 @@ export function HorenView() {
     const pct = total > 0 ? Math.round((scoreCount / total) * 100) : 0;
 
     return (
-      <div className="max-w-md mx-auto py-12 text-center animate-in fade-in space-y-6">
-        <Card className="p-8 border border-neutral-200 dark:border-neutral-800">
-          <Award className="w-16 h-16 text-primary-600 mx-auto mb-4 animate-bounce" />
-          <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-            Hörübung abgeschlossen!
-          </h2>
-          <p className="text-sm text-neutral-500 mt-1">
-            You scored {scoreCount} out of {total} ({pct}%)
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 my-6 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-            <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl">
-              <div className="text-xs text-neutral-500">Correct Answers</div>
-              <div className="text-2xl font-bold text-emerald-600">{scoreCount}</div>
-            </div>
-            <div className="p-3 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl">
-              <div className="text-xs text-neutral-500">XP Gained</div>
-              <div className="text-2xl font-bold text-primary-600">+{scoreCount * 12}</div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Button onClick={() => startSession(exercisePool.length)} className="w-full justify-center">
-              Practice Again
-            </Button>
-            <Button onClick={() => setActiveSession(false)} variant="outline" className="w-full justify-center">
-              Back to Listening Hub
-            </Button>
-          </div>
-        </Card>
+      <div className="py-8 animate-in fade-in">
+        <SessionSummary
+          title="Hörübung abgeschlossen!"
+          subtitle="Listening comprehension audio practice recorded into your German skills."
+          xpEarned={scoreCount * 12}
+          correctAnswers={scoreCount}
+          totalQuestions={total}
+          accuracyPercentage={pct}
+          onContinue={() => setActiveSession(false)}
+          onRetry={() => startSession(exercisePool)}
+        />
       </div>
     );
   }

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { UserProgress, Mistake, StudySession, MockTestResult, Topic, VocabularyWord, WritingSubmission } from '../types';
+import { calculateNextSRS } from '../utils/srs';
+import { evaluateStreak, applyDailyActivity, hasStudiedToday } from '../utils/streak';
 
 const STORAGE_KEY = 'german_a1_progress';
 
@@ -51,6 +53,7 @@ const defaultProgress: UserProgress = {
 
 interface ProgressContextType {
   progress: UserProgress;
+  isStudiedToday: boolean;
   addStudySession: (session: Omit<StudySession, 'id' | 'date'>) => void;
   recordAnswer: (topic: Topic, isCorrect: boolean) => void;
   addMistake: (mistake: Omit<Mistake, 'id' | 'timesCorrectSinceMistake'>) => void;
@@ -63,7 +66,7 @@ interface ProgressContextType {
   loseHeart: () => void;
   addHeart: () => void;
   addXP: (amount: number) => void;
-  completeLesson: (lessonId: number) => void;
+  completeLesson: (lessonId: number, xpReward?: number) => void;
   refillHearts: () => void;
   addCustomVocabWords: (words: VocabularyWord[]) => void;
   recordVocabSRSReview: (wordId: string, quality: 'again' | 'hard' | 'good' | 'easy') => void;
@@ -80,6 +83,10 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     if (stored) {
       try {
         const parsed: UserProgress = { ...defaultProgress, ...JSON.parse(stored) };
+        // Evaluate streak on startup
+        const streakEval = evaluateStreak(parsed);
+        parsed.currentStreak = streakEval.currentStreak;
+
         // Offline heart regeneration calculation (1 heart per hour)
         if (parsed.hearts < 5 && parsed.lastHeartRegenTime) {
           const lastRegen = new Date(parsed.lastHeartRegenTime).getTime();
@@ -133,44 +140,13 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, []);
 
-  const updateStreak = (currentProgress: UserProgress, todayStr: string): UserProgress => {
-    const newProgress = { ...currentProgress };
-    
-    if (newProgress.lastStudyDate !== todayStr) {
-      newProgress.totalStudyDays += 1;
-      
-      if (!newProgress.studyDates.includes(todayStr)) {
-        newProgress.studyDates.push(todayStr);
-      }
-
-      if (newProgress.lastStudyDate) {
-        const lastDate = new Date(newProgress.lastStudyDate);
-        const today = new Date(todayStr);
-        const diffTime = Math.abs(today.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-        
-        if (diffDays === 1) {
-          newProgress.currentStreak += 1;
-        } else if (diffDays > 1) {
-          newProgress.currentStreak = 1;
-        }
-      } else {
-        newProgress.currentStreak = 1;
-      }
-
-      if (newProgress.currentStreak > newProgress.longestStreak) {
-        newProgress.longestStreak = newProgress.currentStreak;
-      }
-      
-      newProgress.lastStudyDate = todayStr;
-    }
-    return newProgress;
+  const updateStreak = (currentProgress: UserProgress): UserProgress => {
+    return applyDailyActivity(currentProgress).updated;
   };
 
   const addStudySession = (sessionData: Omit<StudySession, 'id' | 'date'>) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
-      let newProgress = updateStreak(prev, todayStr);
+      let newProgress = updateStreak(prev);
       
       const newSession: StudySession = {
         ...sessionData,
@@ -187,8 +163,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const recordAnswer = (topic: Topic, isCorrect: boolean) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
-      let newProgress = updateStreak(prev, todayStr);
+      let newProgress = updateStreak(prev);
 
       newProgress.questionsAnswered += 1;
       if (isCorrect) newProgress.correctAnswers += 1;
@@ -273,21 +248,20 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const addXP = (amount: number) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
-      let newProgress = updateStreak(prev, todayStr);
+      let newProgress = updateStreak(prev);
       newProgress.xp = (newProgress.xp || 0) + amount;
       return newProgress;
     });
   };
 
-  const completeLesson = (lessonId: number) => {
+  const completeLesson = (lessonId: number, xpReward: number = 25) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
-      let newProgress = updateStreak(prev, todayStr);
+      let newProgress = updateStreak(prev);
       newProgress.lessonProgress = {
         ...newProgress.lessonProgress,
         [lessonId]: 100
       };
+      newProgress.xp = (newProgress.xp || 0) + xpReward;
       return newProgress;
     });
   };
@@ -326,64 +300,21 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const recordVocabSRSReview = (wordId: string, quality: 'again' | 'hard' | 'good' | 'easy') => {
     setProgress(prev => {
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
       const srsMap = prev.vocabularySRS ? { ...prev.vocabularySRS } : {};
-      const current = srsMap[wordId] || {
-        interval: 1,
-        easeFactor: 2.5,
-        dueDate: todayStr,
-        consecutiveCorrect: 0,
-        mistakesCount: 0
-      };
-
-      let interval = current.interval;
-      let easeFactor = current.easeFactor;
-      let consecutiveCorrect = current.consecutiveCorrect;
-      let mistakesCount = current.mistakesCount;
-
-      if (quality === 'again') {
-        consecutiveCorrect = 0;
-        interval = 1;
-        mistakesCount += 1;
-        easeFactor = Math.max(1.3, easeFactor - 0.2);
-      } else if (quality === 'hard') {
-        consecutiveCorrect += 1;
-        interval = Math.max(1, Math.round(interval * 1.2));
-        easeFactor = Math.max(1.3, easeFactor - 0.15);
-      } else if (quality === 'good') {
-        consecutiveCorrect += 1;
-        interval = consecutiveCorrect === 1 ? 1 : consecutiveCorrect === 2 ? 3 : Math.round(interval * easeFactor);
-      } else { // easy
-        consecutiveCorrect += 1;
-        interval = consecutiveCorrect === 1 ? 2 : consecutiveCorrect === 2 ? 4 : Math.round(interval * easeFactor * 1.3);
-        easeFactor = Math.min(3.0, easeFactor + 0.15);
-      }
-
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + interval);
-      const dueDate = nextDate.toISOString().split('T')[0];
-
-      srsMap[wordId] = {
-        interval,
-        easeFactor,
-        dueDate,
-        consecutiveCorrect,
-        mistakesCount,
-        lastReviewed: todayStr
-      };
+      const nextSRS = calculateNextSRS(srsMap[wordId], quality);
+      srsMap[wordId] = nextSRS;
 
       // Also update vocabularyStatus
       const newStatus = { ...prev.vocabularyStatus };
       if (quality === 'again') {
         newStatus[wordId] = 'learning';
-      } else if (consecutiveCorrect >= 4) {
+      } else if (nextSRS.consecutiveCorrect >= 4) {
         newStatus[wordId] = 'mastered';
       } else {
         newStatus[wordId] = 'review';
       }
 
-      let updated = updateStreak(prev, todayStr);
+      let updated = updateStreak(prev);
       return {
         ...updated,
         vocabularySRS: srsMap,
@@ -394,13 +325,12 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const recordWritingSubmission = (submission: WritingSubmission) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
       const patterns = { ...(prev.writingMistakePatterns || {}) };
       submission.feedback.mistakeCategories.forEach(cat => {
         patterns[cat] = (patterns[cat] || 0) + 1;
       });
 
-      let updated = updateStreak(prev, todayStr);
+      let updated = updateStreak(prev);
       return {
         ...updated,
         writingSubmissions: [submission, ...(prev.writingSubmissions || [])],
@@ -411,7 +341,6 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const recordQuizResult = (topic: string, correct: number, total: number, isEndless: boolean = false) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
       const currentStats = prev.quizStats || { completed: 0, correct: 0, endlessHighScore: 0, byTopic: {} };
       const byTopic = { ...currentStats.byTopic };
       const currentTopic = byTopic[topic] || { answered: 0, correct: 0 };
@@ -422,7 +351,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
       const endlessHighScore = isEndless ? Math.max(currentStats.endlessHighScore || 0, correct) : (currentStats.endlessHighScore || 0);
 
-      let updated = updateStreak(prev, todayStr);
+      let updated = updateStreak(prev);
       return {
         ...updated,
         quizStats: {
@@ -437,7 +366,6 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
 
   const recordListeningResult = (exerciseId: string, exerciseType: string, isCorrect: boolean) => {
     setProgress(prev => {
-      const todayStr = new Date().toISOString().split('T')[0];
       const currentStats = prev.listeningStats || { completed: 0, correct: 0, byType: {} };
       const byType = { ...currentStats.byType };
       const typeData = byType[exerciseType] || { answered: 0, correct: 0 };
@@ -446,7 +374,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
         correct: typeData.correct + (isCorrect ? 1 : 0)
       };
 
-      let updated = updateStreak(prev, todayStr);
+      let updated = updateStreak(prev);
       return {
         ...updated,
         listeningStats: {
@@ -473,6 +401,7 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   return (
     <ProgressContext.Provider value={{
       progress,
+      isStudiedToday: hasStudiedToday(progress),
       addStudySession,
       recordAnswer,
       addMistake,

@@ -44,6 +44,7 @@ export function MockTestView() {
   // Real-time tracking
   const [timeRemaining, setTimeRemaining] = useState(45 * 60);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const answersRef = useRef<Record<string, string>>({});
   const [isPaused, setIsPaused] = useState(false);
 
   // Timestamp references to prevent drift
@@ -119,6 +120,7 @@ export function MockTestView() {
     }
 
     setElapsedSeconds(0);
+    answersRef.current = {};
     setUserAnswers({});
     setMarkedForReview({});
     setCurrentIdx(0);
@@ -164,7 +166,7 @@ export function MockTestView() {
 
     MOCK_EXAM_QUESTIONS.forEach(q => {
       sectionScores[q.section].total += 1;
-      if (userAnswers[q.id] === q.correctAnswer) {
+      if (answersRef.current[q.id] === q.correctAnswer) {
         sectionScores[q.section].correct += 1;
         totalCorrect += 1;
       }
@@ -211,7 +213,11 @@ export function MockTestView() {
   // Answer selection
   const currentQuestion: MockQuestion = MOCK_EXAM_QUESTIONS[currentIdx];
   const selectOption = (opt: string) => {
-    setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: opt }));
+    setUserAnswers(prev => {
+      const nextAnswers = { ...prev, [currentQuestion.id]: opt };
+      answersRef.current = nextAnswers;
+      return nextAnswers;
+    });
   };
 
   const toggleReviewFlag = () => {

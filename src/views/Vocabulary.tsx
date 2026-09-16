@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { VocabularyWord, Difficulty } from '../types';
+import { VocabularyWord, Difficulty, WordType } from '../types';
 import { VOCABULARY } from '../data/content';
 import { ORIGINAL_VOCAB_BANK, VOCAB_TOPICS, generateProceduralVocab } from '../data/vocabBank';
+import { KURSBUCH_VOCABULARY } from '../data/kursbuchVocabulary';
 import { useProgress } from '../store/ProgressContext';
 import { Volume2, Sparkles, RefreshCw, BookOpen, Clock, Layers, Search, Filter } from 'lucide-react';
 import { speakGerman } from '../utils/speech';
@@ -25,6 +26,8 @@ export function VocabularyView() {
   const [activeTab, setActiveTab] = useState<'study' | 'srs' | 'browse'>('study');
   const [selectedLevel, setSelectedLevel] = useState<Difficulty | 'all'>('all');
   const [selectedTopic, setSelectedTopic] = useState<string>('all');
+  const [selectedLesson, setSelectedLesson] = useState<number | 'all'>('all');
+  const [selectedWordType, setSelectedWordType] = useState<WordType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Generation state
@@ -42,7 +45,7 @@ export function VocabularyView() {
 
   // Combine all vocab sources: legacy content + original expanded bank + custom generated words
   const allVocab = useMemo<VocabularyWord[]>(() => {
-    const combined = [...ORIGINAL_VOCAB_BANK, ...VOCABULARY];
+    const combined = [...KURSBUCH_VOCABULARY, ...ORIGINAL_VOCAB_BANK, ...VOCABULARY];
     if (progress.customVocabWords && progress.customVocabWords.length > 0) {
       combined.unshift(...progress.customVocabWords);
     }
@@ -66,6 +69,8 @@ export function VocabularyView() {
       if (selectedTopic !== 'all' && word.topic) {
         if (word.topic !== selectedTopic) return false;
       }
+      if (selectedLesson !== 'all' && word.lesson !== selectedLesson) return false;
+      if (selectedWordType !== 'all' && word.wordType !== selectedWordType) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesGerman = word.german.toLowerCase().includes(q);
@@ -74,7 +79,7 @@ export function VocabularyView() {
       }
       return true;
     });
-  }, [allVocab, selectedLevel, selectedTopic, searchQuery]);
+  }, [allVocab, selectedLevel, selectedTopic, selectedLesson, selectedWordType, searchQuery]);
 
   // Spaced-repetition due words
   const dueWords = useMemo(() => {
@@ -482,6 +487,20 @@ export function VocabularyView() {
           ))}
         </select>
 
+        <select value={selectedLesson} onChange={(e) => setSelectedLesson(e.target.value === 'all' ? 'all' : Number(e.target.value))} aria-label="Select Kursbuch lesson" className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 focus:outline-none">
+          <option value="all">All Lessons</option>
+          {Array.from({ length: 8 }, (_, index) => <option key={index + 1} value={index + 1}>Lektion {index + 1}</option>)}
+        </select>
+
+        <select value={selectedWordType} onChange={(e) => setSelectedWordType(e.target.value as WordType | 'all')} aria-label="Select word type" className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-200 focus:outline-none">
+          <option value="all">All Word Types</option>
+          <option value="noun">Nomen</option>
+          <option value="verb">Verben</option>
+          <option value="adjective">Adjektive</option>
+          <option value="other">Andere Wörter</option>
+          <option value="expression">Ausdrücke</option>
+        </select>
+
         {/* Search input (if browse) */}
         {activeTab === 'browse' && (
           <div className="flex-1 min-w-[200px] ml-auto">
@@ -658,6 +677,11 @@ export function VocabularyView() {
                       {word.difficulty && (
                         <span className="text-[10px] uppercase font-bold text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
                           {word.difficulty}
+                        </span>
+                      )}
+                      {word.wordType && (
+                        <span className="text-[10px] uppercase font-bold text-neutral-500 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded">
+                          {word.wordType === 'noun' ? 'Nomen' : word.wordType === 'verb' ? 'Verb' : word.wordType === 'adjective' ? 'Adjektiv' : word.wordType === 'expression' ? 'Ausdruck' : 'Anderes'}
                         </span>
                       )}
                       {word.isCustom && (

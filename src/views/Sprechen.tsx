@@ -99,9 +99,15 @@ const SPEAKING_TOPICS: SpeakingTopic[] = [
 export function SprechenView() {
   const [currentTopicIdx, setCurrentTopicIdx] = useState(0);
   const [recording, setRecording] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const [finished, setFinished] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const { addStudySession, recordAnswer, addXP } = useProgress();
 
@@ -124,21 +130,59 @@ export function SprechenView() {
     };
   }, [recording]);
 
-  const handleToggleRecord = () => {
+  useEffect(() => () => {
+    if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    if (recordingUrl) URL.revokeObjectURL(recordingUrl);
+  }, [recordingUrl]);
+
+  const finishPractice = () => {
+    setRecording(false);
+    setFinished(true);
+    recordAnswer('sprechen', true);
+    addXP(15);
+    addStudySession({
+      durationMinutes: 2,
+      topics: ['sprechen'],
+      questionsAnswered: 1,
+      correctAnswers: 1
+    });
+  };
+
+  const handleToggleRecord = async () => {
     if (recording) {
-      setRecording(false);
-      setFinished(true);
-      recordAnswer('sprechen', true);
-      addXP(15);
-      addStudySession({
-        durationMinutes: 2,
-        topics: ['sprechen'],
-        questionsAnswered: 1,
-        correctAnswers: 1
-      });
-    } else {
+      recorderRef.current?.stop();
+      finishPractice();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setRecordingError('Audio recording is not supported in this browser.');
+      return;
+    }
+
+    setIsStarting(true);
+    setRecordingError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      chunksRef.current = [];
+      streamRef.current = stream;
+      recorderRef.current = recorder;
+      recorder.ondataavailable = event => {
+        if (event.data.size) chunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        if (blob.size) setRecordingUrl(URL.createObjectURL(blob));
+      };
       setRecording(true);
       setFinished(false);
+    } catch {
+      setRecordingError('Microphone access is needed to record your practice.');
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -268,6 +312,7 @@ export function SprechenView() {
               )}
               <button
                 onClick={handleToggleRecord}
+                disabled={isStarting}
                 className={`relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-white dark:text-neutral-900 transition-all shadow-lg ${
                   recording 
                     ? 'bg-red-500 hover:bg-red-600 text-white dark:text-white shadow-red-500/30' 
@@ -280,8 +325,9 @@ export function SprechenView() {
             </div>
             <div className="flex flex-col items-center gap-1">
               <span className={`font-semibold text-base sm:text-lg ${recording ? 'text-red-500 dark:text-red-400 animate-pulse' : 'text-neutral-700 dark:text-neutral-300'}`}>
-                {recording ? `Recording in progress... (${recordSeconds}s) Click to stop` : 'Click the microphone to start speaking'}
+                {recording ? `Recording in progress... (${recordSeconds}s) Click to stop` : isStarting ? 'Requesting microphone access...' : 'Click the microphone to start speaking'}
               </span>
+              {recordingError && <span className="text-xs text-rose-600 dark:text-rose-400">{recordingError}</span>}
               <span className="text-xs text-neutral-400">
                 Aim for 20–30 seconds of spoken German
               </span>
@@ -297,6 +343,7 @@ export function SprechenView() {
             <div>
               <h3 className="font-bold text-xl sm:text-2xl mb-2 text-neutral-900 dark:text-neutral-100">Ausgezeichnet! (+15 XP)</h3>
               <p className="text-neutral-500 dark:text-neutral-400 text-base sm:text-lg">Speaking practice successfully recorded for {currentTopic.title}.</p>
+              {recordingUrl && <audio className="mt-4 w-full max-w-md" controls src={recordingUrl} />}
             </div>
             
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4">

@@ -4,6 +4,7 @@ import { calculateNextSRS, isItemDue, prioritizeItemsBySRS } from '../src/utils/
 import { evaluateStreak, applyDailyActivity, hasStudiedToday } from '../src/utils/streak';
 import { isUnitUnlocked, isLessonUnlocked, getUnitProgress, CURRICULUM_UNITS } from '../src/utils/units';
 import { UserProgress } from '../src/types';
+import { KURSBUCH_VOCABULARY } from '../src/data/kursbuchVocabulary';
 
 test('SRS: Initial correct review sets 1-day interval and default ease factor', () => {
   const result = calculateNextSRS(undefined, 'good', '2026-09-14');
@@ -268,4 +269,9 @@ test('Units: getUnitProgress calculates completion percentage accurately', () =>
   assert.strictEqual(res.totalCount, 5);
   assert.strictEqual(res.percentage, 40);
   assert.strictEqual(res.isCompleted, false);
+});
+
+test('Kursbuch vocabulary covers lessons 1-8 and every requested word type', () => {
+  assert.deepStrictEqual(new Set(KURSBUCH_VOCABULARY.map(word => word.lesson)), new Set([1, 2, 3, 4, 5, 6, 7, 8]));
+  assert.deepStrictEqual(new Set(KURSBUCH_VOCABULARY.map(word => word.wordType)), new Set(['noun', 'verb', 'adjective', 'other', 'expression']));
 });

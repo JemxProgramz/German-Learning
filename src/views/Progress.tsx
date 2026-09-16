@@ -4,6 +4,12 @@ import { useProgress } from '../store/ProgressContext';
 import { Calendar, Target, Clock, Flame, Award, TrendingUp, CheckCircle2, Zap } from 'lucide-react';
 import { Topic } from '../types';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function dateStringForOffset(offset: number): string {
+  return new Date(Date.now() + offset * DAY_MS).toISOString().split('T')[0];
+}
+
 export function ProgressView() {
   const { progress } = useProgress();
 
@@ -24,6 +30,7 @@ export function ProgressView() {
   // Heatmap generation based on actual study dates
   const weeks = Array.from({ length: 12 }, (_, i) => i);
   const days = Array.from({ length: 7 }, (_, i) => i);
+  const studiedDates = new Set(progress.studyDates || []);
 
   // Skill list configuration
   const skillList: { label: string; key: Topic }[] = [
@@ -182,8 +189,9 @@ export function ProgressView() {
             {weeks.map((week) => (
               <div key={week} className="flex flex-col gap-1.5">
                 {days.map((day) => {
-                  // Real calculation: check if this day has study activity in studyDates or sessions
-                  const isStudied = progress.studyDates && progress.studyDates.length > 0 && (week === 11 && day === new Date().getDay());
+                  const offset = (week - 11) * 7 + day - 6;
+                  const date = dateStringForOffset(offset);
+                  const isStudied = studiedDates.has(date);
                   let bgClass = 'bg-neutral-100 dark:bg-neutral-800/50';
                   if (isStudied) {
                     bgClass = 'bg-primary-600 dark:bg-primary-500';
@@ -193,7 +201,7 @@ export function ProgressView() {
                     <div 
                       key={`${week}-${day}`} 
                       className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[3px] ${bgClass} hover:ring-2 hover:ring-neutral-400 dark:hover:ring-neutral-500 transition-all cursor-pointer`}
-                      title={`Week ${week + 1}, Day ${day + 1}`}
+                      title={date}
                     />
                   );
                 })}

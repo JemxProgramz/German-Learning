@@ -1,5 +1,7 @@
 export type Difficulty = 'A1' | 'A1+' | 'A2' | 'B1';
 
+export type WordType = 'noun' | 'verb' | 'adjective' | 'other' | 'expression';
+
 export type QuestionType = 
   | 'multiple-choice' 
   | 'fill-in-blank' 
@@ -47,6 +49,8 @@ export interface VocabularyWord {
   exampleEnglish: string;
   difficulty?: Difficulty;
   topic?: string;
+  wordType?: WordType;
+  source?: 'kursbuch-1-4' | 'kursbuch-5-8';
   isCustom?: boolean;
 }
 
